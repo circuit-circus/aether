@@ -1,0 +1,18 @@
+{
+  "name": "aether-server",
+  "version": "0.0.1",
+  "description": "Server for the aether installtion",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "express-ejs-layouts": "^2.3.1",
+    "express-ws": "^3.0.0",
+    "readline": "^1.3.0",
+    "ws": "^4.0.0"
+  },
+  "devDependencies": {}
+}
