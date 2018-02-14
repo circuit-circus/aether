@@ -8,10 +8,12 @@ int port = 3000;
 
 // ID of this device
 String thisArduinoID = "0";
+bool hasSentID = false;
 
 WiFiClient wifi;
 WebSocketClient client = WebSocketClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
+
 
 void setup() {
   Serial.begin(9600);
@@ -41,6 +43,17 @@ void loop() {
   client.begin();
 
   while (client.connected()) {
+
+    if(!hasSentID) {
+      // Send a message
+      client.beginMessage(TYPE_TEXT);
+      client.print("MY_ID");
+      client.print(thisArduinoID);
+      client.endMessage();
+
+      hasSentID = true;
+    }
+
     // check if a message is available to be received
     int messageSize = client.parseMessage();
 
@@ -61,5 +74,6 @@ void loop() {
   }
 
   Serial.println("Disconnected");
+  hasSentID = false;
 }
 

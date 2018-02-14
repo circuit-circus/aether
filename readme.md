@@ -19,3 +19,5 @@ Each Arduino (MKR1000) connects to the websocket on the server. They each have a
 
 The ```config.h``` file with wifi information is ignored and should be maintained locally. 
 
+We use this library: https://github.com/arduino-libraries/ArduinoHttpClient
+
