@@ -15,6 +15,8 @@ app.use(ejsLayouts);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+var connectedClients = [];
+
 // serverrr
 server.listen(3000, function listening() {
   console.log('Listening on %d', server.address().port);
@@ -50,9 +52,13 @@ wss.on('connection', function connection(ws, req) {
   ws.on('message', function incoming(message) {
     console.log('Received message from %s. It says: %s', ws.clientIP, message);
 
+    // When a client is connected, it will send its ID. Check for it and save it here!
     if(message.substring(0, 5) == 'MY_ID') {
-      thisID = message.substring(5, message.length);
+      thisID = parseInt(message.substring(5, message.length));
       ws.clientID = thisID;
+
+      // Add the client to the array of current connections
+      connectedClients.push({id: ws.clientID, ip: ws.clientIP});
     }
   });
 
@@ -65,18 +71,28 @@ wss.on('connection', function connection(ws, req) {
 
 // Check if connections are alive
 const interval = setInterval(function ping() {
-  console.log('Minna-san, daijoubu desu ka?');
-  wss.clients.forEach(function each(ws) {
-    if (ws.isAlive === false) {
-      console.log('Client with IP %s and ID %s is not alive! Terminating...', ws.clientIP, ws.clientID);
-      return ws.terminate();
-    }
-    console.log('Client %s: DOKI DOKI', ws.clientID);
-    ws.isAlive = false;
-    ws.ping(function(){});
-  });
-  console.log('');
-}, 10000);
+  console.log('Client array:');
+  console.log(connectedClients);
+  // If no clients are connected, we don't care about checking
+  if(wss.clients.size > 0) {
+    console.log('Minna-san, daijoubu desu ka?');
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) {
+        console.log('Client with IP %s and ID %s is not alive! Terminating...', ws.clientIP, ws.clientID);
+        // Remove the client from array of current connections
+        connectedClients = connectedClients.filter(cli => cli['id'] != ws.clientID);
+        // And terminate it
+        return ws.terminate();
+      }
+      console.log('Client %s: DOKI DOKI', ws.clientID);
+      ws.isAlive = false;
+      ws.ping(function(){});
+    });
+    console.log('');
+  } else {
+    console.log('No clients connected, so no ping happening');
+  }
+}, 5000);
 
 // Function to broadcast to all connections
 wss.broadcast = function broadcast(data) {
