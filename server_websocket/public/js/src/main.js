@@ -7,6 +7,7 @@ $(document).ready(function() {
             'device' : target
         }
 
+        console.log('Clicked');
         sendToPath('get', '/activateDevice', data, function(error, response) {
             if(error) {
                 console.log(error);
