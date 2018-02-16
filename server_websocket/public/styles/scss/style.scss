@@ -1,4 +1,4 @@
-$font-stack : "Lucida Console", Monaco, monospace;
+$font-stack : "Noto Mono", monospace;
 
 * {
     box-sizing: border-box;
@@ -24,6 +24,16 @@ main {
   position: relative;
 }
 
+.content-container {
+  position: absolute;
+  top: 350px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 950px;
+  margin: 0 auto;
+  opacity: 0;
+}
+
 .help-text-container {
   text-align: center;
   //line-height: 2;
@@ -47,9 +57,7 @@ main {
 }
 
 #start-container {
-  position: fixed;
-  bottom: 100px;
-  width: 100%;
+  top: 400px;
 
   h1 {
     text-align: center;
@@ -59,17 +67,10 @@ main {
 }
 
 #input-container {
-  position: absolute;
-  top: 350px;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 950px;
-  margin: 0 auto;
   //border: 1px solid red;
 
   #question-container {
-
-    margin-bottom: 100px;
+    margin-bottom: 75px;
 
     &:after {
       content: ".";
@@ -137,8 +138,8 @@ main {
   }
 }
 
-.content-container {
-  opacity: 0;
+#pick-planet-container {
+  margin-top: 75px;
 }
 
 main[data-state='1'] {
@@ -153,6 +154,13 @@ main[data-state='2'] {
   }
 
   #input-container {
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
+}
+
+main[data-state='3'] {
+  #pick-planet-container {
     opacity: 1;
     transition: opacity 1s ease;
   }
