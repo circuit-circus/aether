@@ -1,0 +1,87 @@
+$font-stack : "Noto Mono", monospace;
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+
+    background-color: #000000;
+    color: #ffffff;
+
+    font-family: $font-stack;
+}
+
+input {
+  -webkit-appearance: none;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+main {
+  position: relative;
+}
+
+.content-container {
+  position: absolute;
+  top: 350px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 950px;
+  margin: 0 auto;
+  opacity: 0;
+}
+
+.help-text-container {
+  text-align: center;
+  //line-height: 2;
+
+  .small {
+    font-size: 12px;
+  }
+}
+
+#planet-container {
+  //border: 1px solid white;
+  width: 1000px;
+  margin: 12px;
+
+  canvas {
+    width: 1000px !important;
+    height: 400px !important;
+    position: absolute;
+    transition: all 0.5s ease;
+  }
+}
+
+main[data-state='1'] {
+  #start-container {
+    opacity: 1;
+  }
+}
+
+main[data-state='2'] {
+  #planet-container canvas {
+    transform: scale(0.5) translateY(-250px);
+  }
+
+  #input-container {
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
+}
+
+main[data-state='3'] {
+  #pick-planet-container {
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
+}
+
+@keyframes blinker {
+  to {
+    visibility: hidden;
+  }
+}

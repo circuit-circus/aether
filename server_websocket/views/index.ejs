@@ -2,72 +2,10 @@
     <div id="planet-container">
     </div>
 
-    <div id="start-container" class="content-container">
-        <h1>Press any key to start</h1>
-    </div>
+    <%- include('partials/state1') %>
 
-    <div id="input-container" class="content-container">
-        <div id="question-container">
-            <div id="question-starter" class="question-element">
-                <div id="question-starter-rotator">
-                    <span>When will</span>
-                    <span class="focus">Is there</span>
-                    <span>Will I</span>
-                    <span>What is</span>
-                    <span>Should I</span>
-                    <span>Can you</span>
-                </div>
-            </div>
-            <div id="question-input" class="question-element">
-                <input id="question-input-field" type="text">
-            </div>
+    <%- include('partials/state2') %>
 
-            <div id="question-end" class="question-element">
-                <span>?</span>
-            </div>
-        </div>
+    <%- include('partials/state3') %>
 
-        <div class="help-text-container">
-            Write a question for the universe<br><br>
-            <span class="small">
-                Use the Arrow Keys to navigate the question starters<br>
-                Press 'Enter' when you are done
-            </span>
-        </div>
-    </div>
-
-
-    <div id="pick-planet-container" class="content-container">
-        <div class="help-text-container">
-            Which planet do you want to ask?<br><br>
-            <span class="small">
-                Use keys 1-8 to select a planet <br>
-                Press 'Enter' to transmit
-            </span>
-        </div>
-    </div>
-
-
-    <!--
-    <button class="arduino-led" data-target="0">0</button>
-    <button class="arduino-led" data-target="1">1</button>
-
-    <div id="question-container">
-        <div id="question-starter" class="question-element">
-            <div id="question-starter-rotator">
-                <div id="overlay"></div>
-                <span>When will</span>
-                <span>Is there</span>
-                <span>Will I</span>
-                <span>What is</span>
-                <span>Should I</span>
-                <span>Can you</span>
-            </div>
-        </div>
-        <span class="question-element">...</span>
-        <div id="question-input" class="question-element">
-            <input type="text">
-        </div>
-    </div>
-
-    -->
+    <%- include('partials/state4') %>

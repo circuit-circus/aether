@@ -1,3 +1,13 @@
+/*
+    States:
+    1 = Title screen
+    2 = Input question
+    3 = Pick planet
+    4 = Transmit and recieve
+*/
+var programState = 1;
+
+// Planet setup
 var NO_OF_PLANETS = 8;
 var planets = [];
 var planetData = [
@@ -33,20 +43,11 @@ var planetData = [
         'name' : 'Navn',
         'diameter' : randomIntFromInterval(70, 110)
     }
-]
-
-/*
-    States:
-    1 = Title screen
-    2 = Input question
-    3 = Pick planet
-    4 = Transmit and recieve
-*/
-var programState = 1;
+];
 
 var showPlanetNames = false;
-var activeDiameterModifier = 0;
 
+// p5 SETUP
 function setup() {
     var myCanvas = createCanvas(1000, 400);
     myCanvas.parent('planet-container');
@@ -61,6 +62,7 @@ function setup() {
     }
 }
 
+// p5 DRAW
 function draw() {
     background(0);
     for(var i = 0; i < NO_OF_PLANETS; i++) {
@@ -69,6 +71,7 @@ function draw() {
     }
 }
 
+// Planet class
 function Planet(xPos, yPos, dia, name) {
     this.x = xPos;
     this.y = yPos;
@@ -80,6 +83,7 @@ function Planet(xPos, yPos, dia, name) {
     this.theta = random(PI / 10);
     this.dtheta = random(0.01, 0.1);
 
+    // Show the planet
     this.display = function() {
         fill(0);
         stroke(255);
@@ -101,6 +105,7 @@ function Planet(xPos, yPos, dia, name) {
         this.isActive = false;
     }
 
+    // Show the planet with the active animation (in State 3 = planet picker)
     this.activeAnimation = function() {
         strokeWeight(3);
         fill(255);
@@ -119,73 +124,17 @@ function Planet(xPos, yPos, dia, name) {
 
 $(document).ready(function() {
 
-    $('button').on('click', function() {
-        $('#planet-container').toggleClass('active');
-    });
-
     // Check for key inputs
     $('body').on('keydown', function(e) {
-        //console.log(e.which);
 
         if(programState == 1) { // Title screen
             e.preventDefault();
-            $('main').attr('data-state', 2);
-            $('#question-input-field').focus();
-            programState = 2;
+            changeToState2(e);
 
         } else if (programState == 2) { // Input question
-
-            // Check for accepted keys
-            if (([8, 9, 13, 16, 32, 37, 38, 39, 40, 186, 222, 219, 189].indexOf(e.which) > -1) || // backspace, tab, enter, shift, space, arrow keys, æøå, dash
-                (e.which >= 48 && e.which <= 57) || // numbers
-                (e.which >= 65 && e.which <= 90) ) { // letters
-
-                // Navigate in question starts
-                if(e.which == 38) { // up
-                    e.preventDefault();
-                    $('#question-starter-rotator').animate({top: '+=50px'});
-                    $('#question-starter-rotator .focus').removeClass('focus').prev().addClass('focus');
-                    /*
-                    if($('#question-starter-rotator .focus').is('#question-starter-rotator span:first')) {
-                        $('#question-starter-rotator span').last().insertBefore('#question-starter-rotator .focus');
-                    }*/
-                } else if (e.which == 40 || e.which == 9) { // down
-                    e.preventDefault();
-                    $('#question-starter-rotator').animate({top: '-=50px'});
-                    $('#question-starter-rotator .focus').removeClass('focus').next().addClass('focus');
-                }
-
-                // Enter
-                if(e.which == 13) {
-                    var questionText = $('#question-input-field').val();
-                    console.log(questionText);
-                    if(!questionText || 0 === questionText.length) {
-                        console.log('You need to put in text!');
-                        return;
-                    }
-
-                    else {
-                        programState = 3;
-                        $('main').attr('data-state', 3);
-                        planets[2].setActive();
-                        showPlanetNames = true;
-                    }
-                }
-            } else {
-                e.preventDefault();
-                console.log('not one of those');
-            }
-
+            runState2(e);
         } else if (programState == 3) { // Select planet
-            e.preventDefault();
-            if((e.which >= 49 && e.which <= 56)) {
-                for(var i = 0; i < NO_OF_PLANETS; i++) {
-                    planets[i].removeActive();
-                }
-                var planetToActivate = e.which - 49;
-                console.log(planetToActivate);
-                planets[planetToActivate].setActive();
-            }
+            runState3(e);
         }
     });
 
@@ -210,6 +159,67 @@ $(document).ready(function() {
     */
 
 });
+
+function changeToState2() {
+    programState = 2;
+    $('main').attr('data-state', 2);
+    $('#question-input-field').focus();
+}
+
+function changeToState3() {
+    programState = 3;
+    $('main').attr('data-state', 3);
+    planets[randomIntFromInterval(0, NO_OF_PLANETS)].setActive();
+    showPlanetNames = true;
+}
+
+function runState2(e) {
+    // Check for accepted keys
+    if (([8, 9, 13, 16, 32, 37, 38, 39, 40, 186, 222, 219, 189].indexOf(e.which) > -1) || // backspace, tab, enter, shift, space, arrow keys, æøå, dash
+        (e.which >= 48 && e.which <= 57) || // numbers
+        (e.which >= 65 && e.which <= 90) ) { // letters
+
+        // Navigate in question starts
+        if(e.which == 38) { // up
+            e.preventDefault();
+            $('#question-starter-rotator').animate({top: '+=50px'});
+            $('#question-starter-rotator .focus').removeClass('focus').prev().addClass('focus');
+
+        } else if (e.which == 40 || e.which == 9) { // down
+            e.preventDefault();
+            $('#question-starter-rotator').animate({top: '-=50px'});
+            $('#question-starter-rotator .focus').removeClass('focus').next().addClass('focus');
+        }
+
+        // Enter
+        if(e.which == 13) {
+            var questionText = $('#question-input-field').val();
+            console.log(questionText);
+            if(!questionText || 0 === questionText.length) {
+                console.log('You need to put in text!');
+                return;
+            }
+
+            else {
+                changeToState3();
+            }
+        }
+    } else {
+        e.preventDefault();
+        console.log('not one of those');
+    }
+}
+
+function runState3(e) {
+    e.preventDefault();
+    if((e.which >= 49 && e.which <= 56)) {
+        for(var i = 0; i < NO_OF_PLANETS; i++) {
+            planets[i].removeActive();
+        }
+        var planetToActivate = e.which - 49;
+        planets[planetToActivate].setActive();
+    }
+}
 
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);

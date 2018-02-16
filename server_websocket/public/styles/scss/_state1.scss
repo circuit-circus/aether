@@ -1,0 +1,9 @@
+#start-container {
+  top: 400px;
+
+  h1 {
+    text-align: center;
+    animation: blinker 1s steps(2, start) infinite;
+    font-size: 20px;
+  }
+}
