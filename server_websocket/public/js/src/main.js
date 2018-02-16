@@ -127,10 +127,15 @@ $(document).ready(function() {
     // Check for key inputs
     $('body').on('keydown', function(e) {
 
+        if($('.popup-container').hasClass('popup-open')) {
+            e.preventDefault();
+            $('.popup-container.popup-open').hide().removeClass('popup-open');
+            return;
+        }
+
         if(programState == 1) { // Title screen
             e.preventDefault();
             changeToState2(e);
-
         } else if (programState == 2) { // Input question
             runState2(e);
         } else if (programState == 3) { // Select planet
@@ -166,11 +171,13 @@ function changeToState2() {
     $('#question-input-field').focus();
 }
 
-function changeToState3() {
+function changeToState3(questionStarter, questionText) {
     programState = 3;
     $('main').attr('data-state', 3);
     planets[randomIntFromInterval(0, NO_OF_PLANETS)].setActive();
     showPlanetNames = true;
+
+    $('#asking-question-container').text(questionStarter + ' ' + questionText);
 }
 
 function runState2(e) {
@@ -194,14 +201,14 @@ function runState2(e) {
         // Enter
         if(e.which == 13) {
             var questionText = $('#question-input-field').val();
-            console.log(questionText);
             if(!questionText || 0 === questionText.length) {
-                console.log('You need to put in text!');
+                var audio = new Audio('sound/error.mp3');
+                audio.play();
+                $('#missing-input').show().addClass('popup-open');
                 return;
-            }
-
-            else {
-                changeToState3();
+            } else {
+                var questionStarter = $('#question-starter-rotator .focus').text();
+                changeToState3(questionStarter, questionText);
             }
         }
     } else {

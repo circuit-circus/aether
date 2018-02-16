@@ -14,10 +14,11 @@ html, body {
     font-family: $font-stack;
 }
 
-input {
+input, button {
   -webkit-appearance: none;
   box-shadow: none !important;
   outline: none !important;
+  font-family: $font-stack;
 }
 
 main {
@@ -74,7 +75,7 @@ main[data-state='2'] {
 }
 
 main[data-state='3'] {
-  #pick-planet-container {
+  #asking-question-container, #pick-planet-container {
     opacity: 1;
     transition: opacity 1s ease;
   }
