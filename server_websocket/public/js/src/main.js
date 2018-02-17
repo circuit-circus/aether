@@ -174,10 +174,10 @@ function changeToState2() {
 function changeToState3(questionStarter, questionText) {
     programState = 3;
     $('main').attr('data-state', 3);
-    planets[randomIntFromInterval(0, NO_OF_PLANETS)].setActive();
+    planets[randomIntFromInterval(1, NO_OF_PLANETS - 1)].setActive(); // pick a random planet to be active. But not the first or last, that looks ugly
     showPlanetNames = true;
 
-    $('#asking-question-container').text(questionStarter + ' ' + questionText);
+    $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
 }
 
 function runState2(e) {
@@ -200,7 +200,7 @@ function runState2(e) {
 
         // Enter
         if(e.which == 13) {
-            var questionText = $('#question-input-field').val();
+            var questionText = $('#question-input-field').val().trim();
             if(!questionText || 0 === questionText.length) {
                 var audio = new Audio('sound/error.mp3');
                 audio.play();
