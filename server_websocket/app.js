@@ -6,6 +6,9 @@ var ejsLayouts = require('express-ejs-layouts');
 var path = require('path');
 const app = express();
 
+let generatePyPath = '../aether_python/rnn_play.py';
+let printPyPath = '../aether_python/rnn_print.py';
+
 const server = http.createServer(app); // Create normal http server
 const wss = new WebSocket.Server({ server : server, clientTracking : true }); // Create websocket
 
@@ -106,3 +109,20 @@ wss.broadcast = function broadcast(data) {
     }
   });
 };
+
+// Python calls
+let myQuestion = 'Is there life on Mars?';
+let myPlanet = 'NN-05';
+function getAnswer(questionTxt, planetName) {
+  console.log('Get answer')
+  var spawn = require('child_process').spawn;
+  var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
+
+  // Returns the generated text
+  process.stdout.on('data', function (data) {
+    printReceipt(questionTxt, planetName, data.toString());
+  });
+}
+
+// This should be put into a /get request
+getAnswer(myQuestion, myPlanet)
