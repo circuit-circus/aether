@@ -81,6 +81,17 @@ main[data-state='3'] {
   }
 }
 
+main[data-state='4'] {
+  #planet-container canvas {
+    transform: scale(0.5) translateY(-250px);
+  }
+
+  #transmission-container {
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
+}
+
 @keyframes blinker {
   to {
     visibility: hidden;

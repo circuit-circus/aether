@@ -180,6 +180,15 @@ function changeToState3(questionStarter, questionText) {
     $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
 }
 
+function changeToState4() {
+    programState = 4;
+    $('main').attr('data-state', 4);
+
+    setTimeout(function() {
+        runState4();
+    }, 1000);
+}
+
 function runState2(e) {
     // Check for accepted keys
     if (([8, 9, 13, 16, 32, 37, 38, 39, 40, 186, 222, 219, 189].indexOf(e.which) > -1) || // backspace, tab, enter, shift, space, arrow keys, æøå, dash
@@ -225,7 +234,83 @@ function runState3(e) {
         }
         var planetToActivate = e.which - 49;
         planets[planetToActivate].setActive();
+
+
+    } else if (e.which == 13) {
+
+        var chosenPlanet;
+        for(var i = 0; i < NO_OF_PLANETS; i++) {
+            if(planets[i].isActive) {
+                console.log('Planet number %i, %s, is active', i, planets[i].name);
+                chosenPlanet = i;
+            }
+        }
+        changeToState4(chosenPlanet);
     }
+
+}
+
+var terminalStrings = [
+    {
+        strings: ['', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading complete'],
+        smartBackspace: true,
+        typeSpeed: 200
+    },
+    {
+        strings: ['', 'Initializing transmission'],
+        smartBackspace: false,
+        typeSpeed: 40
+    },
+    {
+        strings: ['', 'npm install^1000\n `installing components...` ^1000\n `Fetching from source...`'],
+        smartBackspace: false,
+        typeSpeed: 40
+    },
+    {
+        strings: ['', 'Transmission COMPLETE'],
+        smartBackspace: false,
+        typeSpeed: 40
+    },
+    {
+        strings: ['', '.', '..', '...'],
+        smartBackspace: true,
+        typeSpeed: 40
+    }
+];
+
+var count = 0;
+
+function runState4() {
+
+    type();
+
+    console.log('DONEZO')
+
+    //
+}
+
+function type() {
+
+    var options = {
+        strings: terminalStrings[count].strings,
+        typeSpeed: 40,
+        smartBackspace : terminalStrings[count].smartBackspace,
+        showCursor: false,
+        onComplete: (self) => {
+            console.log(self);
+            if(count < terminalStrings.length - 1) {
+                //var lastStr = $('<span id="terminal-content-line"></span>').html('<span id="terminal-user">root@aether:~$ </span>').append(self.strings[self.strings.length - 1]);
+                var clone = $('.terminal-new-content').clone().removeClass('terminal-new-content').addClass('terminal-content-line');
+                $('#terminal-content').append(clone);
+                $('.terminal-new-content #terminal-typing').html('');
+
+                count++;
+                type();
+            }
+        }
+    }
+
+    var typed = new Typed('.terminal-new-content #terminal-typing ', options);
 }
 
 function randomIntFromInterval(min, max) {

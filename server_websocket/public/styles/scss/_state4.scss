@@ -1,0 +1,37 @@
+
+#terminal-container {
+    width: 700px;
+    height: 350px;
+    border: 2px solid #fff;
+    padding: 10px;
+    margin: 0 auto;
+    font-size: 10px;
+    line-height: 1.5;
+
+    #terminal-content {
+
+        #terminal-content-line {
+            display: block;
+        }
+    }
+
+    #terminal-typing {
+        white-space: pre-line;
+    }
+
+    #terminal-user {
+        color: gray;
+    }
+}
+
+#transmitting-popup {
+    height: 110px;
+
+    #transmitting-status-bar {
+        width: 20%;
+        height: 100%;
+        border: 4px solid #fff;
+        background-color: #000;
+    }
+}
+
