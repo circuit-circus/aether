@@ -47,10 +47,9 @@ ALPHASIZE = my_txtutils.ALPHASIZE
 NLAYERS = 3
 INTERNALSIZE = 512
 
-hitchhikersA0 = currentDirectory + "/aether/checkpoints/rnn_train_1518875836-3000000"
-
-# use topn=10 for all but the last one which works with topn=2 for Shakespeare and topn=3 for Python
-author = hitchhikersA0
+authorDir = currentDirectory + "/aether/checkpoints/";
+authorWeights = "rnn_train_1518967046-126000000";
+author = authorDir + authorWeights;
 
 ncnt = 0
 generatedResult = ""
