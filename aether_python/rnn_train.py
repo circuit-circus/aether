@@ -22,6 +22,9 @@ import time
 import math
 import numpy as np
 import my_txtutils as txt
+
+import freeze_graph as freeze_graph
+
 tf.set_random_seed(0)
 
 SEQLEN = 30
@@ -36,6 +39,21 @@ dropout_pkeep = 0.8    # some dropout
 dataname = "aether"
 datadir = dataname + "/data/*.txt"
 codetext, valitext, bookranges = txt.read_data_files(datadir, validation=True)
+
+# graph freezing variables
+# Taken from here: https://github.com/tensorflow/tensorflow/blob/r0.11/tensorflow/python/tools/freeze_graph_test.py
+checkpoint_dir = "aether/checkpoints/"
+checkpoint_state_name = "checkpoint_state"
+input_graph_name = "input_graph_to_freeze.pb"
+input_graph_path = "aether/graphs/" + input_graph_name
+input_saver_def_path = ""
+input_binary = False
+input_checkpoint_path = ""  # Set automatically when saving a checkpoint
+output_graph_path = "aether/graphs/frozen_output_graph.pb"
+output_node_names = "X,Y_,Hin,pkeep,batchsize,Yo,H"
+restore_op_name = "save/restore_all"
+filename_tensor_name = "save/Const:0"
+clear_devices = False
 
 # display some stats on the data
 epoch_size = len(codetext) // (BATCHSIZE * SEQLEN)
@@ -75,7 +93,6 @@ H = tf.identity(H, name='H')  # just to give it a name
 # Flatten the first two dimension of the output [ BATCHSIZE, SEQLEN, ALPHASIZE ] => [ BATCHSIZE x SEQLEN, ALPHASIZE ]
 # then apply softmax readout layer. This way, the weights and biases are shared across unrolled time steps.
 # From the readout point of view, a value coming from a sequence time step or a minibatch item is the same thing.
-
 Yflat = tf.reshape(Yr, [-1, INTERNALSIZE])    # [ BATCHSIZE x SEQLEN, INTERNALSIZE ]
 Ylogits = layers.linear(Yflat, ALPHASIZE)     # [ BATCHSIZE x SEQLEN, ALPHASIZE ]
 Yflat_ = tf.reshape(Yo_, [-1, ALPHASIZE])     # [ BATCHSIZE x SEQLEN, ALPHASIZE ]
@@ -94,22 +111,14 @@ loss_summary = tf.summary.scalar("batch_loss", batchloss)
 acc_summary = tf.summary.scalar("batch_accuracy", accuracy)
 summaries = tf.merge_summary([loss_summary, acc_summary])
 
-# Init Tensorboard stuff. This will save Tensorboard information into a different
-# folder at each run named 'log/<timestamp>/'. Two sets of data are saved so that
-# you can compare training and validation curves visually in Tensorboard.
-timestamp = str(math.trunc(time.time()))
-#summary_writer = tf.summary.FileWriter(dataname + "/log/" + timestamp + "-training")
-#validation_writer = tf.summary.FileWriter(dataname + "/log/" + timestamp + "-validation")
-
-# Init for saving models. They will be saved into a directory named 'checkpoints'.
-# Only the last checkpoint is kept.
+# Init for saving models
 if not os.path.exists(dataname + "/checkpoints"):
     os.mkdir(dataname + "/checkpoints")
 saver = tf.train.Saver(max_to_keep=1000)
 
 # for display: init the progress bar
-DISPLAY_FREQ = 50
-_50_BATCHES = DISPLAY_FREQ * BATCHSIZE * SEQLEN
+DISPLAY_FREQ = 10
+BATCHES_PER_FREQ = DISPLAY_FREQ * BATCHSIZE * SEQLEN
 progress = txt.Progress(DISPLAY_FREQ, size=111+2, msg="Training on next "+str(DISPLAY_FREQ)+" batches")
 
 # init
@@ -126,18 +135,16 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
     feed_dict = {X: x, Y_: y_, Hin: istate, lr: learning_rate, pkeep: dropout_pkeep, batchsize: BATCHSIZE}
     _, y, ostate = sess.run([train_step, Y, H], feed_dict=feed_dict)
 
-    # log training data for Tensorboard display a mini-batch of sequences (every 50 batches)
-    if step % _50_BATCHES == 0:
+    recent_loss = ""
+
+    # log training data for Tensorboard display a mini-batch of sequences
+    if step % BATCHES_PER_FREQ == 0:
         feed_dict = {X: x, Y_: y_, Hin: istate, pkeep: 1.0, batchsize: BATCHSIZE}  # no dropout for validation
         y, l, bl, acc, smm = sess.run([Y, seqloss, batchloss, accuracy, summaries], feed_dict=feed_dict)
         txt.print_learning_learned_comparison(x, y, l, bookranges, bl, acc, epoch_size, step, epoch)
-        #summary_writer.add_summary(smm, step)
 
-    # run a validation step every 50 batches
-    # The validation text should be a single sequence but that's too slow (1s per 1024 chars!),
-    # so we cut it up and batch the pieces (slightly inaccurate)
-    # tested: validating with 5K sequences instead of 1K is only slightly more accurate, but a lot slower.
-    if step % _50_BATCHES == 0 and len(valitext) > 0:
+    # run a validation step 
+    if step % BATCHES_PER_FREQ == 0 and len(valitext) > 0:
         VALI_SEQLEN = 1*1024  # Sequence length for validation. State will be wrong at the start of each sequence.
         bsize = len(valitext) // VALI_SEQLEN
         txt.print_validation_header(len(codetext), bookranges)
@@ -146,12 +153,11 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
         feed_dict = {X: vali_x, Y_: vali_y, Hin: vali_nullstate, pkeep: 1.0,  # no dropout for validation
                      batchsize: bsize}
         ls, acc, smm = sess.run([batchloss, accuracy, summaries], feed_dict=feed_dict)
+        recent_loss = ls
         txt.print_validation_stats(ls, acc)
-        # save validation data for Tensorboard
-        #validation_writer.add_summary(smm, step)
 
-    # display a short text generated with the current weights and biases (every 150 batches)
-    if step // 3 % _50_BATCHES == 0:
+    # display a short text generated with the current weights and biases 
+    if step // 3 % BATCHES_PER_FREQ == 0:
         txt.print_text_generation_header()
         ry = np.array([[txt.convert_from_alphabet(ord("K"))]])
         rh = np.zeros([1, INTERNALSIZE * NLAYERS])
@@ -162,13 +168,18 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
             ry = np.array([[rc]])
         txt.print_text_generation_footer()
 
-    # save a checkpoint (every 500 batches)
-    if step // 10 % _50_BATCHES == 0:
-        saved_file = saver.save(sess, dataname + '/checkpoints/rnn_train_' + timestamp, global_step=step)
+    # save a checkpoint
+    if step // 3 % BATCHES_PER_FREQ == 0:
+        saved_file = saver.save(sess, dataname + '/checkpoints/rnn_train_' + str(recent_loss))
+        tf.train.write_graph(sess.graph.as_graph_def(), "aether/graphs", input_graph_name)
+        # call rnn_manual_graph_freeze.py to freeze graphs so they can be pulled quickly into rnn_play.py
+        """freeze_graph.freeze_graph(input_graph_path, input_saver_def_path, input_binary, saved_file,
+            output_node_names, restore_op_name,
+            filename_tensor_name, output_graph_path, clear_devices, "")"""
         print("Saved file: " + saved_file)
 
     # display progress bar
-    progress.step(reset=step % _50_BATCHES == 0)
+    progress.step(reset=step % BATCHES_PER_FREQ == 0)
 
     # loop state around
     istate = ostate

@@ -18,9 +18,28 @@ import numpy as np
 import my_txtutils
 import os
 import sys
+import glob
 
-#print("Getting parameters")
-sys.stdout.flush()
+debugging = True
+
+# this text collating is slow. Should be done before hand and saved to a file
+alltext = ""
+dataname = "aether"
+datadir = dataname + "/data/*.txt"
+
+datalist = glob.glob(datadir, recursive=True)
+for datafile in datalist:
+    datafileobj = open(datafile, "r")
+    datatext = datafileobj.read()
+    print("Loading file " + datafile)
+    alltext = alltext + datatext
+    datafileobj.close()
+
+chars = sorted(list(set(alltext)))
+print('total chars:', len(chars))
+print(chars);
+char_indices = dict((c, i) for i, c in enumerate(chars))
+
 # Import parameters
 questionTxt = ""
 if len(sys.argv) > 1:
@@ -34,68 +53,65 @@ questionAnswer = ""
 if len(sys.argv) > 3:
     questionAnswer = sys.argv[3]
 
-#print("Getting directory")
-#sys.stdout.flush()
 if os.path.dirname(__file__) != '':
     os.chdir(os.path.dirname(__file__))
 currentDirectory = os.getcwd()
 
-#print("Setting variables")
-sys.stdout.flush()
 # these must match what was saved !
 ALPHASIZE = my_txtutils.ALPHASIZE
 NLAYERS = 3
 INTERNALSIZE = 512
 
-authorDir = currentDirectory + "/aether/checkpoints/";
-authorWeights = "rnn_train_1518967046-126000000";
-author = authorDir + authorWeights;
-
-ncnt = 0
 generatedResult = ""
+# if you want to use a different graph, you have to freeze a new one with rnn_manual_graph_freeze.py
+output_graph_name = "aether/graphs/frozen_output_graph.pb"
 with tf.Session() as sess:
-    #print("Importing meta graph: " + author)
-    #sys.stdout.flush()
-    new_saver = tf.train.import_meta_graph(author + ".meta")
-    #print("Restoring meta graph: " + author)
-    #sys.stdout.flush()
-    new_saver.restore(sess, author)
-    #print("Converting data")
-    #sys.stdout.flush()
     x = my_txtutils.convert_from_alphabet(ord("L"))
-    #print("Tensoring array with NumPy")
-    #sys.stdout.flush()
+
     x = np.array([[x]])  # shape [BATCHSIZE, SEQLEN] with BATCHSIZE=1 and SEQLEN=1
 
     # initial values
     y = x
-    #print("Setting np.zeros")
-    #sys.stdout.flush()
+
     h = np.zeros([1, INTERNALSIZE * NLAYERS], dtype=np.float32)  # [ BATCHSIZE, INTERNALSIZE * NLAYERS]
-    for i in range(75):
-        #print("Running session. On step " + str(i) + " of 75")
-        #sys.stdout.flush()
-        yo, h = sess.run(['Yo:0', 'H:0'], feed_dict={'X:0': y, 'pkeep:0': 1., 'Hin:0': h, 'batchsize:0': 1})
 
-        # If sampling is be done from the topn most likely characters, the generated text
-        # is more credible and more "english". If topn is not set, it defaults to the full
-        # distribution (ALPHASIZE)
+    # Use frozen graph for increased speed
+    with tf.Graph().as_default():
+        output_graph_def = tf.GraphDef()
+        # Get this graph and import it
+        with open(output_graph_name, "rb") as f:
+            output_graph_def.ParseFromString(f.read())
+            _ = tf.import_graph_def(output_graph_def, name="")
 
-        # Recommended: topn = 10 for intermediate checkpoints, topn=2 or 3 for fully trained checkpoints
+        with tf.Session() as sess:
+            output_node = sess.graph.get_tensor_by_name("Y_:0")
 
-        c = my_txtutils.sample_from_probabilities(yo, topn=5)
-        y = np.array([[c]])  # shape [BATCHSIZE, SEQLEN] with BATCHSIZE=1 and SEQLEN=1
-        c = chr(my_txtutils.convert_to_alphabet(c))
-        generatedResult = generatedResult + c
+            for i in range(75):
+                sentence = "These violent delights will have violent ends."
 
-        if c == '\n':
-            ncnt = 0
-        else:
-            ncnt += 1
-        if ncnt == 100:
-            ncnt = 0
-    #print("Done with session. Here's your answer.")
-    #sys.stdout.flush()
+                x_pred = np.zeros([1, INTERNALSIZE * NLAYERS], dtype=np.float32)
+                print(x_pred[0][0])
+
+                for t, char in enumerate(sentence):
+                    x_pred[0, char_indices[char]] = 1.
+
+                print(x_pred[0][0])
+
+                yo, x_pred = sess.run(['Yo:0', 'H:0'], feed_dict={'X:0': y, 'pkeep:0': 1., 'Hin:0': x_pred, 'batchsize:0': 1})
+
+                # If sampling is be done from the topn most likely characters, the generated text
+                # is more credible and more "english". If topn is not set, it defaults to the full
+                # distribution (ALPHASIZE)
+
+                # Recommended: topn = 10 for intermediate checkpoints, topn=2 or 3 for fully trained checkpoints
+
+                c = my_txtutils.sample_from_probabilities(yo, topn=5)
+                y = np.array([[c]])  # shape [BATCHSIZE, SEQLEN] with BATCHSIZE=1 and SEQLEN=1
+                c = chr(my_txtutils.convert_to_alphabet(c))
+                generatedResult = generatedResult + c
+    if debugging:
+        print("Done with session. Here's your answer.")
+        sys.stdout.flush()
 
     # Source: https://medium.com/@HolmesLaurence/integrating-node-and-python-6b8454bfc272
     # Print the final result so we can pick it up in Node.js
