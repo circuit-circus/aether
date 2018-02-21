@@ -20,24 +20,28 @@ import os
 import sys
 import glob
 
-debugging = True
+tf.set_random_seed(0)
+
+debugging = False
 
 # this text collating is slow. Should be done before hand and saved to a file
 alltext = ""
 dataname = "aether"
-datadir = dataname + "/data/*.txt"
+datadir = "data/*.txt"
 
 datalist = glob.glob(datadir, recursive=True)
 for datafile in datalist:
     datafileobj = open(datafile, "r")
     datatext = datafileobj.read()
-    print("Loading file " + datafile)
+    if debugging:
+        print("Loading file " + datafile)
     alltext = alltext + datatext
     datafileobj.close()
 
 chars = sorted(list(set(alltext)))
-print('total chars:', len(chars))
-print(chars);
+if debugging:
+    print('total chars:', len(chars))
+    print(chars);
 char_indices = dict((c, i) for i, c in enumerate(chars))
 
 # Import parameters
@@ -64,7 +68,7 @@ INTERNALSIZE = 512
 
 generatedResult = ""
 # if you want to use a different graph, you have to freeze a new one with rnn_manual_graph_freeze.py
-output_graph_name = "aether/graphs/frozen_output_graph.pb"
+output_graph_name = "graphs/frozen_output_graph.pb"
 with tf.Session() as sess:
     x = my_txtutils.convert_from_alphabet(ord("L"))
 
@@ -86,18 +90,21 @@ with tf.Session() as sess:
         with tf.Session() as sess:
             output_node = sess.graph.get_tensor_by_name("Y_:0")
 
-            for i in range(75):
+            for i in range(500):
                 sentence = "These violent delights will have violent ends."
 
                 x_pred = np.zeros([1, INTERNALSIZE * NLAYERS], dtype=np.float32)
-                print(x_pred[0][0])
+                if debugging:
+                    print(x_pred[0][0])
 
                 for t, char in enumerate(sentence):
                     x_pred[0, char_indices[char]] = 1.
 
-                print(x_pred[0][0])
+                if debugging:
+                    print(x_pred[0][0])
 
-                yo, x_pred = sess.run(['Yo:0', 'H:0'], feed_dict={'X:0': y, 'pkeep:0': 1., 'Hin:0': x_pred, 'batchsize:0': 1})
+                yo, h = sess.run(['Yo:0', 'H:0'], feed_dict={'X:0': y, 'pkeep:0': 1., 'Hin:0': h, 'batchsize:0': 1})
+                # x_pred, h = sess.run(['Yo:0', 'H:0'], feed_dict={'X:0': y, 'pkeep:0': 1., 'Hin:0': h, 'batchsize:0': 1})
 
                 # If sampling is be done from the topn most likely characters, the generated text
                 # is more credible and more "english". If topn is not set, it defaults to the full
@@ -105,7 +112,8 @@ with tf.Session() as sess:
 
                 # Recommended: topn = 10 for intermediate checkpoints, topn=2 or 3 for fully trained checkpoints
 
-                c = my_txtutils.sample_from_probabilities(yo, topn=5)
+                c = my_txtutils.sample_from_probabilities(yo, topn=3)
+                # c = my_txtutils.sample_from_probabilities(x_pred, topn=5)
                 y = np.array([[c]])  # shape [BATCHSIZE, SEQLEN] with BATCHSIZE=1 and SEQLEN=1
                 c = chr(my_txtutils.convert_to_alphabet(c))
                 generatedResult = generatedResult + c

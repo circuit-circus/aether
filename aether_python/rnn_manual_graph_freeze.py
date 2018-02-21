@@ -9,14 +9,13 @@ import tensorflow as tf
 #from tensorflow.python.framework import test_util
 import freeze_graph as freeze_graph
 
-checkpoint_dir = "aether/checkpoints/"
+checkpoint_dir = "final_checkpoint/"
 checkpoint_state_name = "checkpoint_state"
-input_graph_path = "aether/graphs/"
+input_graph_path = "graphs/"
 input_graph_name = "input_graph_to_freeze.pb"
-output_graph_name = "aether/graphs/frozen_output_graph.pb"
+output_graph_name = "graphs/frozen_output_graph.pb"
 
-# Change this to change the checkpoint to freeze
-input_checkpoint_path = checkpoint_dir + "rnn_train_4.418352"
+input_checkpoint_path = checkpoint_dir + "final_checkpoint"
 with tf.Session() as sess:
 	new_saver = tf.train.import_meta_graph(input_checkpoint_path + ".meta")
 	new_saver.restore(sess, input_checkpoint_path)

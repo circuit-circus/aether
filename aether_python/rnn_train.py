@@ -37,19 +37,19 @@ dropout_pkeep = 0.8    # some dropout
 
 # load data, either shakespeare, or the Python source of Tensorflow itself
 dataname = "aether"
-datadir = dataname + "/data/*.txt"
+datadir = "data/*.txt"
 codetext, valitext, bookranges = txt.read_data_files(datadir, validation=True)
 
 # graph freezing variables
 # Taken from here: https://github.com/tensorflow/tensorflow/blob/r0.11/tensorflow/python/tools/freeze_graph_test.py
-checkpoint_dir = "aether/checkpoints/"
+checkpoint_dir = "checkpoints/"
 checkpoint_state_name = "checkpoint_state"
 input_graph_name = "input_graph_to_freeze.pb"
-input_graph_path = "aether/graphs/" + input_graph_name
+input_graph_path = "graphs/" + input_graph_name
 input_saver_def_path = ""
 input_binary = False
 input_checkpoint_path = ""  # Set automatically when saving a checkpoint
-output_graph_path = "aether/graphs/frozen_output_graph.pb"
+output_graph_path = "graphs/frozen_output_graph.pb"
 output_node_names = "X,Y_,Hin,pkeep,batchsize,Yo,H"
 restore_op_name = "save/restore_all"
 filename_tensor_name = "save/Const:0"
@@ -112,8 +112,8 @@ acc_summary = tf.summary.scalar("batch_accuracy", accuracy)
 summaries = tf.merge_summary([loss_summary, acc_summary])
 
 # Init for saving models
-if not os.path.exists(dataname + "/checkpoints"):
-    os.mkdir(dataname + "/checkpoints")
+if not os.path.exists("checkpoints"):
+    os.mkdir("checkpoints")
 saver = tf.train.Saver(max_to_keep=1000)
 
 # for display: init the progress bar
@@ -169,13 +169,12 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
         txt.print_text_generation_footer()
 
     # save a checkpoint
-    if step // 3 % BATCHES_PER_FREQ == 0:
-        saved_file = saver.save(sess, dataname + '/checkpoints/rnn_train_' + str(recent_loss))
-        tf.train.write_graph(sess.graph.as_graph_def(), "aether/graphs", input_graph_name)
-        # call rnn_manual_graph_freeze.py to freeze graphs so they can be pulled quickly into rnn_play.py
-        """freeze_graph.freeze_graph(input_graph_path, input_saver_def_path, input_binary, saved_file,
-            output_node_names, restore_op_name,
-            filename_tensor_name, output_graph_path, clear_devices, "")"""
+    if step // 10 % BATCHES_PER_FREQ == 0:
+        # if you want to use the generated checkpoint, move it into "final_checkpoints", 
+        # and rename the two generated files "final_checkpoint" and final_checkpoint.meta
+        saved_file = saver.save(sess, 'checkpoints/rnn_train_' + str(recent_loss))
+        tf.train.write_graph(sess.graph.as_graph_def(), "graphs", input_graph_name)
+        # remember to call rnn_manual_graph_freeze.py to freeze graphs so they can be pulled quickly into rnn_play.py
         print("Saved file: " + saved_file)
 
     # display progress bar
