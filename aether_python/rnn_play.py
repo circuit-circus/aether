@@ -90,15 +90,15 @@ with tf.Session() as sess:
         with tf.Session() as sess:
             output_node = sess.graph.get_tensor_by_name("Y_:0")
 
-            for i in range(500):
+            for i in range(100):
                 sentence = "These violent delights will have violent ends."
 
                 x_pred = np.zeros([1, INTERNALSIZE * NLAYERS], dtype=np.float32)
                 if debugging:
                     print(x_pred[0][0])
 
-                for t, char in enumerate(sentence):
-                    x_pred[0, char_indices[char]] = 1.
+                '''for t, char in enumerate(sentence):
+                    x_pred[0, char_indices[char]] = 1.'''
 
                 if debugging:
                     print(x_pred[0][0])
