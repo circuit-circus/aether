@@ -40,6 +40,20 @@ app.get('/activateDevice', function(req, res) {
     wss.broadcast(data); // Broadcast data to all connected devices
 });
 
+// Send a signal to all connected devices, saying which one to activate
+app.get('/sendQuestion', function(req, res) {
+    var question = req.query.question;
+    var planetName = req.query.planetName;
+
+    getAnswer(question, planetName);
+    let response = {
+      status : 0,
+      message : 'Receipt is being printed'
+    }
+
+    res.send(response);
+});
+
 // When a new handshake is established, this event is fired
 wss.on('connection', function connection(ws, req) {
   const ip = req.connection.remoteAddress;
@@ -111,18 +125,30 @@ wss.broadcast = function broadcast(data) {
 };
 
 // Python calls
-let myQuestion = 'Is there life on Mars?';
-let myPlanet = 'NN-05';
+let myQuestion = 'What is behind this door?';
+let myPlanet = 'ARNOLD-2.0';
+
+// Send a request to the neural network for some text
 function getAnswer(questionTxt, planetName) {
-  console.log('Get answer')
   var spawn = require('child_process').spawn;
   var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
 
   // Returns the generated text
   process.stdout.on('data', function (data) {
-    printReceipt(questionTxt, planetName, data.toString());
+    console.log(data.toString());
+    return printReceipt(questionTxt, planetName, data.toString());
+    process.kill();
   });
 }
 
-// This should be put into a /get request
-getAnswer(myQuestion, myPlanet)
+// Print a receipt with the given inputs. Defaults to blank
+function printReceipt(questionTxt, planetName, answerTxt) {
+  var spawn = require('child_process').spawn;
+  var process = spawn('python', [printPyPath, questionTxt, planetName, answerTxt]);
+
+  process.stdout.on('data', function (data) {
+    console.log(data.toString());
+    process.kill();
+    return answerTxt;
+  });
+}
