@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from Adafruit_Thermal import *
+from lib.Adafruit_Thermal import *
 from PIL import Image, ImageDraw
 from time import sleep
 import sys
@@ -14,7 +14,7 @@ questionTxt = "What is behind this door?"
 if len(sys.argv) > 1:
 	questionTxt = sys.argv[1]
 
-planetName = "ARNOLD-2.0"
+planetName = "BRNRD-2.0"
 if len(sys.argv) > 2:
 	planetName = sys.argv[2]
 

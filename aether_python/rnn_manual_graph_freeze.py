@@ -7,9 +7,9 @@ import os
 import tensorflow as tf
 
 #from tensorflow.python.framework import test_util
-import freeze_graph as freeze_graph
+import lib.freeze_graph as freeze_graph
 
-checkpoint_dir = "final_checkpoint/"
+checkpoint_dir = "final_checkpoints/"
 checkpoint_state_name = "checkpoint_state"
 input_graph_path = "graphs/"
 input_graph_name = "input_graph_to_freeze.pb"
