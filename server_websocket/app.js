@@ -45,13 +45,21 @@ app.get('/sendQuestion', function(req, res) {
     var question = req.query.question;
     var planetName = req.query.planetName;
 
-    getAnswer(question, planetName);
-    let response = {
-      status : 0,
-      message : 'Receipt is being printed'
-    }
-
-    res.send(response);
+    getAnswer(question, planetName).then(function(fulfilled) {
+      console.log(fulfilled);
+      let response = {
+        status : 200,
+        message : fulfilled
+      }
+      res.send(response);
+    })
+    .catch(function(error) {
+      let response = {
+        status : 500,
+        message : 'There was an error in generating the text. Sorry!'
+      }
+      res.send(response);
+    });
 });
 
 // When a new handshake is established, this event is fired
@@ -126,18 +134,21 @@ wss.broadcast = function broadcast(data) {
 
 // Python calls
 let myQuestion = 'What is behind this door?';
-let myPlanet = 'ARNOLD-2.0';
+let myPlanet = 'BRNRD-2.0';
 
 // Send a request to the neural network for some text
 function getAnswer(questionTxt, planetName) {
-  var spawn = require('child_process').spawn;
-  var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
+  return new Promise(function(resolve, reject) {
+    var spawn = require('child_process').spawn;
+    var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
 
-  // Returns the generated text
-  process.stdout.on('data', function (data) {
-    console.log(data.toString());
-    return printReceipt(questionTxt, planetName, data.toString());
-    process.kill();
+    // Returns the generated text
+    process.stdout.on('data', function (data) {
+      console.log(data.toString());
+      process.kill();
+      printReceipt(questionTxt, planetName, data.toString());
+      resolve(data.toString());
+    });
   });
 }
 

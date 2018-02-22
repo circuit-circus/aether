@@ -189,7 +189,7 @@ function changeToState4(planetId) {
         planetName : planetData[planetId].name
     };
     sendToPath('get', '/sendQuestion', data, function(response) {
-        if(response.status === 0) {
+        if(response.status === 200) {
             console.log(response.status + ': Question and planet data sent successfully.');
             console.log(response.message);
         }
