@@ -6,8 +6,8 @@ var ejsLayouts = require('express-ejs-layouts');
 var path = require('path');
 const app = express();
 
-let generatePyPath = '../aether_python/rnn_play.py';
-let printPyPath = '../aether_python/rnn_print.py';
+let generatePyPath = __dirname + '/../aether_python/rnn_play.py';
+let printPyPath = __dirname + '/../aether_python/rnn_print.py';
 
 const server = http.createServer(app); // Create normal http server
 const wss = new WebSocket.Server({ server : server, clientTracking : true }); // Create websocket
@@ -138,6 +138,7 @@ let myPlanet = 'BRNRD-2.0';
 
 // Send a request to the neural network for some text
 function getAnswer(questionTxt, planetName) {
+  console.log('Getting answer for this: ' + questionTxt + '|' + planetName);
   return new Promise(function(resolve, reject) {
     var spawn = require('child_process').spawn;
     var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
@@ -149,11 +150,16 @@ function getAnswer(questionTxt, planetName) {
       printReceipt(questionTxt, planetName, data.toString());
       resolve(data.toString());
     });
+
+    process.stderr.on('data', (data) => {
+      console.log('stderr getanswer:' + data);
+    });
   });
 }
 
 // Print a receipt with the given inputs. Defaults to blank
 function printReceipt(questionTxt, planetName, answerTxt) {
+  console.log('Printing receipt');
   var spawn = require('child_process').spawn;
   var process = spawn('python', [printPyPath, questionTxt, planetName, answerTxt]);
 
@@ -161,5 +167,9 @@ function printReceipt(questionTxt, planetName, answerTxt) {
     console.log(data.toString());
     process.kill();
     return answerTxt;
+  });
+
+  process.stderr.on('data', (data) => {
+    console.log('stderr print receipt:' + data);
   });
 }
