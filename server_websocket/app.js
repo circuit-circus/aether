@@ -22,7 +22,6 @@ var apiRoutes = require('./routes/api');
 app.use('/', viewRoutes);
 app.use('/api', apiRoutes);
 
-
 // Socket service
 var websocket_helpers = require('./services/websocket_helpers');
 const webSocketServer = websocket_helpers.createWebsocketServer(app);
@@ -34,5 +33,3 @@ websocket_service(webSocketServer);
 server.listen(3000, function listening() {
   console.log('Listening on %d', server.address().port);
 });
-
-

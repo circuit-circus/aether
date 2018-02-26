@@ -36,9 +36,8 @@ module.exports = function(wss) {
   });
 
   // Check if connections are alive
-  const interval = setInterval(function ping() {
+  const checkClientConnections = setInterval(function ping() {
     // If no clients are connected, we don't care about checking
-    console.log('Checking')
     if(wss.clients.size > 0) {
       console.log('Minna-san, daijoubu desu ka?');
       wss.clients.forEach(function each(ws) {

@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 var python = require('../services/python');
-var websocket_helpers = require('../services/socket_helpers');
+var websocket_helpers = require('../services/websocket_helpers');
 
 // Send a signal to all connected devices, saying which one to activate
 router.post('/activateTransmission', function(req, res) {
@@ -24,9 +24,10 @@ router.post('/activateTransmission', function(req, res) {
     res.send(response);
   })
   .catch(function(error) {
+    console.log(error);
     let response = {
       status : 500,
-      message : 'There was an error in generating the text. Sorry!'
+      message : 'There was an error in generating the text. Error: ' + error
     }
     res.send(response);
   });

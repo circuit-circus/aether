@@ -23,7 +23,7 @@ function getAnswer(questionTxt, planetName) {
     });
 
     process.stderr.on('data', (data) => {
-      console.log('stderr getanswer:' + data);
+      reject(Error('stderr getanswer:' + data));
     });
   });
 }
