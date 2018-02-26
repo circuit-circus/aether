@@ -143,26 +143,6 @@ $(document).ready(function() {
         }
     });
 
-
-    /*
-    $('.arduino-led').on('click', function(e) {
-        var target = $(this).attr('data-target');
-
-        var data = {
-            'device' : target
-        }
-
-        console.log('Clicked');
-        sendToPath('get', '/activateDevice', data, function(error, response) {
-            if(error) {
-                console.log(error);
-            } else {
-                console.log(response);
-            }
-        });
-    });
-    */
-
 });
 
 function changeToState2() {
@@ -186,16 +166,24 @@ function changeToState4(planetId) {
 
     var data = {
         question : $('#asking-question-container').text(),
-        planetName : planetData[planetId].name
+        planetName : planetData[planetId].name,
+        planetId : planetId
     };
-    sendToPath('get', '/sendQuestion', data, function(response) {
-        if(response.status === 200) {
-            console.log(response.status + ': Question and planet data sent successfully.');
-            console.log(response.message);
-        }
-        else {
-            console.log(response.status + ': Question and planet data failed.');
-        }
+
+    fetch('/api/activateTransmission', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(req_status)
+    .then(req_json)
+    .then(function(data) {
+        console.log('Request succeeded with JSON response', data);
+    }).catch(function(error) {
+        console.log('Request failed', error);
     });
 
     setTimeout(function() {
@@ -326,38 +314,18 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-/**
- * send data to URL
- *
- * @param {string}      Method (get, delete, post, etc.)
- * @param {string}      Path
- * @param {object}      Data
- * @param {function}    Callback, either progress(percent) or done(error, result) if progress IS NOT defined
- * @param {function}    Callback, done(error, result) if progress IS defined
- */
-function sendToPath(method, path, data, callback) {
 
-    var options = {
-        url      : path,
-        type     : method,
-        contentType: 'application/json',
-        dataType : 'json',
-        data     : data,
-        success  : function (body) {
-            callback(body);
-        },
-        error    : function (body) {
-            callback(body);
-        }
-    };
-
-    // If a progress callback is specified, add event listener if possible
-    if (callback) {
-        options.xhr = function () {
-            var xhr = new window.XMLHttpRequest();
-            return xhr;
-        }
+function req_status(response) {
+    console.log('Determining status');
+    console.log(response.status);
+    if (response.status >= 200 && response.status < 300) {
+        return Promise.resolve(response)
+    } else {
+        return Promise.reject(new Error(response.statusText))
     }
+}
 
-    $.ajax(options);
+function req_json(response) {
+    console.log('Process response json');
+    return response.json();
 }
