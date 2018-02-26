@@ -174,7 +174,7 @@ function changeToState2() {
 function changeToState3(questionStarter, questionText) {
     programState = 3;
     $('main').attr('data-state', 3);
-    planets[randomIntFromInterval(1, NO_OF_PLANETS - 1)].setActive(); // pick a random planet to be active. But not the first or last, that looks ugly
+    planets[randomIntFromInterval(1, NO_OF_PLANETS - 2)].setActive(); // pick a random planet to be active. But not the first or last, that looks ugly
     showPlanetNames = true;
 
     $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
@@ -281,15 +281,10 @@ var terminalStrings = [
 var count = 0;
 
 function runState4() {
-
-    type();
-
-    console.log('DONEZO')
-
-    //
+    runTerminalGUI();
 }
 
-function type() {
+function runTerminalGUI() {
 
     var options = {
         strings: terminalStrings[count].strings,
@@ -297,15 +292,13 @@ function type() {
         smartBackspace : terminalStrings[count].smartBackspace,
         showCursor: false,
         onComplete: (self) => {
-            console.log(self);
             if(count < terminalStrings.length - 1) {
-                //var lastStr = $('<span id="terminal-content-line"></span>').html('<span id="terminal-user">root@aether:~$ </span>').append(self.strings[self.strings.length - 1]);
                 var clone = $('.terminal-new-content').clone().removeClass('terminal-new-content').addClass('terminal-content-line');
                 $('#terminal-content').append(clone);
                 $('.terminal-new-content #terminal-typing').html('');
 
                 count++;
-                type();
+                runTerminalGUI();
             }
         }
     }
