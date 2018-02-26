@@ -52,6 +52,15 @@ For the Raspberry Pi, Python3 should be pre-installed, so you just need to insta
 Raspbian's newest available version of Tensorflow is v. 0.11.0, so there should be no trouble here. Just install it by calling:
 `sudo pip3 install tensorflow`
 
+You might get an error like this: 
+```Traceback (most recent call last):
+  File "/home/pi/.local/lib/python3.5/site-packages/numpy/core/__init__.py", line 16, in <module>
+    from . import multiarray
+ImportError: libf77blas.so.3: cannot open shared object file: No such file or directory
+```
+
+In this case, you need to run the following: `sudo apt-get install libatlas-base-dev`
+
 The Neural Network code is drawn from [this repo](https://github.com/burliEnterprises/tensorflow-shakespeare-poem-generator). There are tiny modifications here and there. 
 
 #### Printing

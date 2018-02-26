@@ -23,7 +23,7 @@ import math
 import numpy as np
 import my_txtutils as txt
 
-import freeze_graph as freeze_graph
+import lib.freeze_graph as freeze_graph
 
 tf.set_random_seed(0)
 
@@ -117,7 +117,7 @@ if not os.path.exists("checkpoints"):
 saver = tf.train.Saver(max_to_keep=1000)
 
 # for display: init the progress bar
-DISPLAY_FREQ = 10
+DISPLAY_FREQ = 100
 BATCHES_PER_FREQ = DISPLAY_FREQ * BATCHSIZE * SEQLEN
 progress = txt.Progress(DISPLAY_FREQ, size=111+2, msg="Training on next "+str(DISPLAY_FREQ)+" batches")
 
