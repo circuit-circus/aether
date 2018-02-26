@@ -180,9 +180,23 @@ function changeToState3(questionStarter, questionText) {
     $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
 }
 
-function changeToState4() {
+function changeToState4(planetId) {
     programState = 4;
     $('main').attr('data-state', 4);
+
+    var data = {
+        question : $('#asking-question-container').text(),
+        planetName : planetData[planetId].name
+    };
+    sendToPath('get', '/sendQuestion', data, function(response) {
+        if(response.status === 200) {
+            console.log(response.status + ': Question and planet data sent successfully.');
+            console.log(response.message);
+        }
+        else {
+            console.log(response.status + ': Question and planet data failed.');
+        }
+    });
 
     setTimeout(function() {
         runState4();
@@ -249,6 +263,8 @@ function runState3(e) {
     }
 
 }
+
+
 
 var terminalStrings = [
     {

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from Adafruit_Thermal import *
+from lib.Adafruit_Thermal import *
 from PIL import Image, ImageDraw
 from time import sleep
 import sys
@@ -10,15 +10,15 @@ if os.path.dirname(__file__) != '':
     os.chdir(os.path.dirname(__file__))
 currentDirectory = os.getcwd()
 
-questionTxt = ""
+questionTxt = "What is behind this door?"
 if len(sys.argv) > 1:
 	questionTxt = sys.argv[1]
 
-planetName = ""
+planetName = "BRNRD-2.0"
 if len(sys.argv) > 2:
 	planetName = sys.argv[2]
 
-questionAnswer = ""
+questionAnswer = "What door?"
 if len(sys.argv) > 3:
 	questionAnswer = sys.argv[3]
 

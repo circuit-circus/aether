@@ -6,8 +6,8 @@ var ejsLayouts = require('express-ejs-layouts');
 var path = require('path');
 const app = express();
 
-let generatePyPath = '../aether_python/rnn_play.py';
-let printPyPath = '../aether_python/rnn_print.py';
+let generatePyPath = __dirname + '/../aether_python/rnn_play.py';
+let printPyPath = __dirname + '/../aether_python/rnn_print.py';
 
 const server = http.createServer(app); // Create normal http server
 const wss = new WebSocket.Server({ server : server, clientTracking : true }); // Create websocket
@@ -38,6 +38,28 @@ app.get('/activateDevice', function(req, res) {
 
     console.log('Activating device %s', data);
     wss.broadcast(data); // Broadcast data to all connected devices
+});
+
+// Send a signal to all connected devices, saying which one to activate
+app.get('/sendQuestion', function(req, res) {
+    var question = req.query.question;
+    var planetName = req.query.planetName;
+
+    getAnswer(question, planetName).then(function(fulfilled) {
+      console.log(fulfilled);
+      let response = {
+        status : 200,
+        message : fulfilled
+      }
+      res.send(response);
+    })
+    .catch(function(error) {
+      let response = {
+        status : 500,
+        message : 'There was an error in generating the text. Sorry!'
+      }
+      res.send(response);
+    });
 });
 
 // When a new handshake is established, this event is fired
@@ -111,18 +133,43 @@ wss.broadcast = function broadcast(data) {
 };
 
 // Python calls
-let myQuestion = 'Is there life on Mars?';
-let myPlanet = 'NN-05';
-function getAnswer(questionTxt, planetName) {
-  console.log('Get answer')
-  var spawn = require('child_process').spawn;
-  var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
+let myQuestion = 'What is behind this door?';
+let myPlanet = 'BRNRD-2.0';
 
-  // Returns the generated text
-  process.stdout.on('data', function (data) {
-    printReceipt(questionTxt, planetName, data.toString());
+// Send a request to the neural network for some text
+function getAnswer(questionTxt, planetName) {
+  console.log('Getting answer for this: ' + questionTxt + '|' + planetName);
+  return new Promise(function(resolve, reject) {
+    var spawn = require('child_process').spawn;
+    var process = spawn('python3', [generatePyPath, questionTxt, planetName]);
+
+    // Returns the generated text
+    process.stdout.on('data', function (data) {
+      console.log(data.toString());
+      process.kill();
+      printReceipt(questionTxt, planetName, data.toString());
+      resolve(data.toString());
+    });
+
+    process.stderr.on('data', (data) => {
+      console.log('stderr getanswer:' + data);
+    });
   });
 }
 
-// This should be put into a /get request
-getAnswer(myQuestion, myPlanet)
+// Print a receipt with the given inputs. Defaults to blank
+function printReceipt(questionTxt, planetName, answerTxt) {
+  console.log('Printing receipt');
+  var spawn = require('child_process').spawn;
+  var process = spawn('python', [printPyPath, questionTxt, planetName, answerTxt]);
+
+  process.stdout.on('data', function (data) {
+    console.log(data.toString());
+    process.kill();
+    return answerTxt;
+  });
+
+  process.stderr.on('data', (data) => {
+    console.log('stderr print receipt:' + data);
+  });
+}
