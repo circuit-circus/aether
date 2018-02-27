@@ -23,11 +23,14 @@ app.use('/', viewRoutes);
 app.use('/api', apiRoutes);
 
 // Socket service
-var websocket_helpers = require('./services/websocket_helpers');
-const webSocketServer = websocket_helpers.createWebsocketServer(app);
+var websocketHelpers = require('./services/websocket_helpers');
+const webSocketServer = websocketHelpers.createWebsocketServer(app);
+var websocketService = require('./services/websocket');
+websocketService(webSocketServer);
 
-var websocket_service = require('./services/websocket');
-websocket_service(webSocketServer);
+// Serial connection with Arduino
+var serialConnection = require('./services/serial');
+serialConnection();
 
 // serverrr
 server.listen(3000, function listening() {
