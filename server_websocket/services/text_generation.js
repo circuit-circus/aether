@@ -29,7 +29,7 @@ function getAnswer(questionTxt, planetName) {
   return new Promise(function(resolve, reject) {
     if(textGenerator !== undefined) {
     	let sentence = textGenerator.makeSentence();
-    	console.log('Generated this answer: ')
+    	console.log('Generated this answer: ' + sentence);
     	resolve(sentence);
     }
     else {

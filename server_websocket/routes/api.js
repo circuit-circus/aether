@@ -20,6 +20,7 @@ router.post('/activateTransmission', function(req, res) {
   // Get an answer
   textGenService.getAnswer(question, planetName).then(function(fulfilled) {
     python.printReceipt(question, planetName, fulfilled).then(function(printMessage) {
+      console.log(printMessage);
       let response = {
         status : 200,
         message : printMessage
@@ -30,7 +31,7 @@ router.post('/activateTransmission', function(req, res) {
       console.log(error);
       let response = {
         status : 500,
-        message : 'There was an error in printing the text. Error: ' + error
+        message : 'There was an error in printing the text. ' + error
       }
       res.send(response);
     });
@@ -39,7 +40,7 @@ router.post('/activateTransmission', function(req, res) {
     console.log(error);
     let response = {
       status : 500,
-      message : 'There was an error in generating the text. Error: ' + error
+      message : 'There was an error in generating the text. ' + error
     }
     res.send(response);
   });
