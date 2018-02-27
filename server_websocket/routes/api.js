@@ -4,6 +4,8 @@ const router = express.Router();
 
 var python = require('../services/python');
 var websocket_helpers = require('../services/websocket_helpers');
+var textGenService = require('../services/text_generation');
+textGenService.initGenerator();
 
 // Send a signal to all connected devices, saying which one to activate
 router.post('/activateTransmission', function(req, res) {
@@ -16,12 +18,22 @@ router.post('/activateTransmission', function(req, res) {
   websocket_helpers.broadcast(planetId); // Broadcast data to all connected devices
 
   // Get an answer
-  python.getAnswer(question, planetName).then(function(fulfilled) {
-    let response = {
-      status : 200,
-      message : fulfilled
-    }
-    res.send(response);
+  textGenService.getAnswer(question, planetName).then(function(fulfilled) {
+    python.printReceipt(question, planetName, fulfilled).then(function(printMessage) {
+      let response = {
+        status : 200,
+        message : printMessage
+      }
+      res.send(response);
+    })
+    .catch(function(error) {
+      console.log(error);
+      let response = {
+        status : 500,
+        message : 'There was an error in printing the text. Error: ' + error
+      }
+      res.send(response);
+    });
   })
   .catch(function(error) {
     console.log(error);
