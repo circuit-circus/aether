@@ -10,7 +10,8 @@ int activeLED = 0;
 
 
 void setup() {
-  Serial.println(9600);
+  Serial.begin(9600);
+  
 
   pinMode(questionPotPin, INPUT);
   pinMode(planetPotPin, INPUT);
@@ -24,17 +25,31 @@ void setup() {
   digitalWrite(backLED, HIGH);
   digitalWrite(forwardLED, HIGH);
 
+  delay(2000);
+  Serial.println("BEGIN!");
+
 }
 
 void loop() {
 
-  int questionPotVal = analogRead(questionPotPin);
-  int planetPotVal = analogRead(planetPotPin);
+  //int questionPotVal = analogRead(questionPotPin);
+  //int planetPotVal = analogRead(planetPotPin);
+
+  long questionPotVal = random(300);
+  long planetPotVal = random(300);
+
+  Serial.print("QUESTION_POT: ");
+  Serial.println(questionPotVal);
+  delay(random(10000));
+  Serial.print("PLANET_POT: ");
+  Serial.println(planetPotVal);
+  delay(random(10000));
 
   // Send potentiometer vals to server
-  Serial.println(questionPotVal + "," + planetPotVal);
+  //Serial.println(questionPotVal + "," + planetPotVal);
 
   // If a button is pressed, send that to server
+  /*
   if(digitalRead(backButton)) {
     // Back button Pressed
     Serial.println("BACK");
@@ -43,6 +58,8 @@ void loop() {
     // Forward button Pressed
     Serial.println("FORWARD");
   }
+  */
+
 }
 
 

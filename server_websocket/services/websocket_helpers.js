@@ -56,8 +56,23 @@ function broadcast(data) {
   });
 };
 
+function sendToGUI(data) {
+  console.log(data);
+
+  wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN && client.isLocalConnection == true) {
+      client.send(data, function ack(error) {
+        if(error) {
+          console.log('There was an error: %s', error);
+        }
+      });
+    }
+  });
+}
+
 module.exports = {
   createWebsocketServer,
   broadcast,
-  getConnectedArduinoClients
+  getConnectedArduinoClients,
+  sendToGUI
 };

@@ -1,6 +1,8 @@
 var serialPort = require('serialport');
 var currentData = '';
 
+var websocket_helpers = require('../services/websocket_helpers');
+
 function createSerialPort() {
 
   // Check if an Arduino is connected to a port. If yes, get the portname
@@ -10,7 +12,7 @@ function createSerialPort() {
         if(port.manufacturer && port.manufacturer.includes('Arduino')) resolve(port.comName);
       });
 
-      reject(Error('No Arduino port found'));
+      reject(Error('No Arduino (for TUI) port found'));
     });
   });
 
@@ -23,7 +25,10 @@ function createSerialPort() {
 
     // Read data that is available but keep the stream from entering "flowing mode"
     port.on('readable', function () {
-        currentData = port.read().toString('utf8').trim();
+        var data = port.read().toString('utf8').trim();
+        if (data.includes('BACK') || data.includes('FORWARD') || data.includes('QUESTION_POT') || data.includes('PLANET_POT')) {
+          websocket_helpers.sendToGUI(data);
+        }
     });
   }, function(err) {
     console.log(err);
