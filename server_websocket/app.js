@@ -29,8 +29,8 @@ var websocketService = require('./services/websocket');
 websocketService(webSocketServer);
 
 // Serial connection with Arduino
-var serialConnection = require('./services/serial');
-serialConnection();
+var serialService = require('./services/serial');
+serialService.createSerialPort();
 
 // serverrr
 server.listen(3000, function listening() {
