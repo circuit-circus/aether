@@ -5,7 +5,7 @@
 
 // Adress and port of the Raspberry Pi with the Node Server on
 char serverAddress[] = "192.168.43.72";
-int port = 3000;
+int port = 8080;
 
 // ID of this device
 String thisArduinoID = "1";

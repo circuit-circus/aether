@@ -7,6 +7,17 @@ var websocket_helpers = require('../services/websocket_helpers');
 var textGenService = require('../services/text_generation');
 textGenService.initGenerator();
 
+// Get currently connected ardunos
+router.get('/currentArduinoClients', function(req, res) {
+  var currentConnections = websocket_helpers.getConnectedArduinoClients();
+
+  let response = {
+    status: 200,
+    message: currentConnections
+  }
+  res.send(response);
+});
+
 // Send a signal to all connected devices, saying which one to activate
 router.post('/activateTransmission', function(req, res) {
 

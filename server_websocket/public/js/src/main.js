@@ -6,6 +6,8 @@
     4 = Transmit and recieve
 */
 var programState = 1;
+var question_pot_position;
+var planet_pot_position;
 
 // Planet setup
 var NO_OF_PLANETS = 8;
@@ -13,35 +15,43 @@ var planets = [];
 var planetData = [
     {
         'name' : 'JSPR92',
-        'diameter' : randomIntFromInterval(70, 110)
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 0
     },
     {
         'name' : 'TX9600',
-        'diameter' : randomIntFromInterval(70, 110)
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 1
     },
     {
         'name' : 'VSOVS-io 8',
-        'diameter' : randomIntFromInterval(70, 110)
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 2
     },
     {
         'name' : 'NN-05',
-        'diameter' : randomIntFromInterval(70, 110)
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 3
     },
     {
         'name' : 'CRCTCRCS2015x',
-        'diameter' : randomIntFromInterval(70, 110)
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 4
     },
     {
-        'name' : 'Navn',
-        'diameter' : randomIntFromInterval(70, 110)
+        'name' : 'Mediacom',
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 5
     },
     {
-        'name' : 'Navn',
-        'diameter' : randomIntFromInterval(70, 110)
+        'name' : 'GroupM',
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 6
     },
     {
-        'name' : 'Navn',
-        'diameter' : randomIntFromInterval(70, 110)
+        'name' : 'm6',
+        'diameter' : randomIntFromInterval(70, 110),
+        'id' : 7
     }
 ];
 
@@ -58,71 +68,115 @@ function setup() {
 
     for(var i = 0; i < NO_OF_PLANETS; i++) {
         var pos = i * 125 + ((125-planetData[i].diameter) / 2 + planetData[i].diameter/2);
-        planets[i] = new Planet(pos, 200, planetData[i].diameter, planetData[i].name);
+        planets[i] = new Planet(pos, 200, planetData[i].diameter, planetData[i].name, planetData[i].id);
     }
+
+    updateConnectedPlanets();
+
 }
 
 // p5 DRAW
 function draw() {
     background(0);
-    for(var i = 0; i < NO_OF_PLANETS; i++) {
-        planets[i].display();
-        if(planets[i].isActive) planets[i].activeAnimation();
-    }
+    planets.forEach(function(planet) {
+        planet.display();
+    });
 }
 
 // Planet class
-function Planet(xPos, yPos, dia, name) {
+function Planet(xPos, yPos, dia, name, id) {
     this.x = xPos;
     this.y = yPos;
     this.diameter = dia;
     this.name = name;
+    this.id = id;
 
-    this.isActive = false;
+    this.isConnectionActive = true; // Is there a connection to the planet
+
+    this.hasFocus = false; // Is the planet selected in the GUI (step 3)
 
     this.theta = random(PI / 10);
     this.dtheta = random(0.01, 0.1);
 
     // Show the planet
     this.display = function() {
-        fill(0);
-        stroke(255);
-        strokeWeight(1);
-        ellipse(this.x, this.y, this.diameter, this.diameter);
 
-        if(showPlanetNames) {
-            textAlign(CENTER);
+        if(this.hasFocus && !this.isConnectionActive) {
+            strokeWeight(2);
+            stroke(100);
             fill(100);
-            noStroke();
-            text(this.name, this.x, 300);
+            ellipse(this.x, this.y, this.diameter, this.diameter);
+
+        } else if(this.hasFocus) {
+            strokeWeight(3);
+            stroke(255);
+            fill(255);
+
+            this.theta += this.dtheta;
+            var r = this.diameter + (this.diameter * (sin(this.theta) + 1) / 10);
+            ellipse(this.x, this.y, r, r);
+
+        } else if (!this.isConnectionActive) {
+            strokeWeight(2);
+            fill(0);
+            stroke(100);
+            ellipse(this.x, this.y, this.diameter, this.diameter);
+
+        } else {
+            strokeWeight(2);
+            fill(0);
+            stroke(255);
+            ellipse(this.x, this.y, this.diameter, this.diameter);
         }
-    }
-
-    this.setActive = function() {
-        this.isActive = true;
-    }
-    this.removeActive = function() {
-        this.isActive = false;
-    }
-
-    // Show the planet with the active animation (in State 3 = planet picker)
-    this.activeAnimation = function() {
-        strokeWeight(3);
-        fill(255);
-
-        this.theta += this.dtheta;
-        var r = this.diameter + (this.diameter * (sin(this.theta) + 1) / 10);
-        ellipse(this.x, this.y, r, r);
 
         if(showPlanetNames) {
             textAlign(CENTER);
-            strokeWeight(1);
+            fill(255);
+            noStroke();
+
+            if(!this.isConnectionActive) {
+                fill(100);
+                text('Unavailable', this.x, 325);
+            }
+
             text(this.name, this.x, 300);
+
         }
+    }
+
+    this.setConnectionIsActive = function() {
+        this.isConnectionActive = true;
+    }
+    this.removeConnectionIsActive = function() {
+        this.isConnectionActive = false;
+    }
+
+    this.setFocus = function() {
+        this.hasFocus = true;
+    }
+    this.removeFocus = function() {
+        this.hasFocus = false;
     }
 }
 
 $(document).ready(function() {
+
+    // Open websocket connection
+    window.WebSocket = window.WebSocket || window.MozWebSocket;
+    var connection = new WebSocket('ws://localhost:8080');
+
+    // Handle incomming websocket messages
+    connection.onmessage = function (event) {
+      console.log(event.data);
+      var websocket_data = event.data;
+
+      if(websocket_data.includes('QUESTION_POT')) {
+        question_pot_position = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+      } else if(websocket_data.includes('PLANET_POT')) {
+        planet_pot_position = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+      }
+
+    }
 
     // Check for key inputs
     $('body').on('keydown', function(e) {
@@ -154,7 +208,7 @@ function changeToState2() {
 function changeToState3(questionStarter, questionText) {
     programState = 3;
     $('main').attr('data-state', 3);
-    planets[randomIntFromInterval(1, NO_OF_PLANETS - 2)].setActive(); // pick a random planet to be active. But not the first or last, that looks ugly
+    planets[randomIntFromInterval(1, NO_OF_PLANETS - 2)].setFocus(); // pick a random planet to be active. But not the first or last, that looks ugly
     showPlanetNames = true;
 
     $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
@@ -232,22 +286,31 @@ function runState3(e) {
     e.preventDefault();
     if((e.which >= 49 && e.which <= 56)) {
         for(var i = 0; i < NO_OF_PLANETS; i++) {
-            planets[i].removeActive();
+            planets[i].removeFocus();
         }
-        var planetToActivate = e.which - 49;
-        planets[planetToActivate].setActive();
+        var planetToFocusOn = e.which - 49;
+        planets[planetToFocusOn].setFocus();
 
 
     } else if (e.which == 13) {
 
         var chosenPlanet;
         for(var i = 0; i < NO_OF_PLANETS; i++) {
-            if(planets[i].isActive) {
-                console.log('Planet number %i, %s, is active', i, planets[i].name);
+            if(planets[i].hasFocus) {
+                console.log('Planet number %i, %s, has focus', i, planets[i].name);
+
+                if(!planets[i].isConnectionActive) {
+                    // TODO: Change the error message (make array and select random)
+                    var audio = new Audio('sound/error.mp3');
+                    audio.play();
+                    $('#unavailable-planet').show().addClass('popup-open');
+                    return;
+                }
+
                 chosenPlanet = i;
+                changeToState4(chosenPlanet);
             }
         }
-        changeToState4(chosenPlanet);
     }
 
 }
@@ -308,6 +371,34 @@ function runTerminalGUI() {
     }
 
     var typed = new Typed('.terminal-new-content #terminal-typing ', options);
+}
+
+
+function updateConnectedPlanets() {
+    fetch('/api/currentArduinoClients')
+    .then(req_status)
+    .then(req_json)
+    .then(function(data) {
+        console.log('Request succeeded with JSON response', data);
+
+        var connectedlanetsFromAPI = data.message;
+
+        var props = ['id'];
+        var inactivePlanets = planets.filter(function(o1) {
+            // filter out (!) items in result2
+            return !connectedlanetsFromAPI.some(function(o2) {
+                return o1.id === o2.id; // assumes unique id
+            });
+        });
+
+        inactivePlanets.forEach(function(inactivePlanet) {
+            inactivePlanet.removeConnectionIsActive();
+        });
+
+
+    }).catch(function(error) {
+        console.log('Request failed', error);
+    });
 }
 
 function randomIntFromInterval(min, max) {
