@@ -9,6 +9,12 @@ var programState = 1;
 var question_pot_position;
 var planet_pot_position;
 
+var RESET_TIME = 30000;
+var programInactive = false;
+
+var terminalCounter = 0;
+
+
 // Planet setup
 var NO_OF_PLANETS = 8;
 var planets = [];
@@ -178,8 +184,14 @@ $(document).ready(function() {
 
     }
 
+    // Check for program inactivity every X seconds
+    setInterval(resetProgramTimer, RESET_TIME);
+
+
     // Check for key inputs
     $('body').on('keydown', function(e) {
+
+        programInactive = false;
 
         if($('.popup-container').hasClass('popup-open')) {
             e.preventDefault();
@@ -312,9 +324,25 @@ function runState3(e) {
             }
         }
     }
-
 }
 
+function runState4() {
+    runTerminalGUI();
+}
+
+function resetProgram() {
+    programState = 1;
+    showPlanetNames = false;
+    for(var i = 0; i < NO_OF_PLANETS; i++) {
+        planets[i].removeFocus();
+    }
+    terminalCounter = 0;
+    $('#question-input-field').val('');
+    $('#terminal-content').html('');
+    $('.terminal-new-content #terminal-typing').html('');
+    $('main').attr('data-state', 1);
+
+}
 
 
 var terminalStrings = [
@@ -345,26 +373,23 @@ var terminalStrings = [
     }
 ];
 
-var count = 0;
-
-function runState4() {
-    runTerminalGUI();
-}
 
 function runTerminalGUI() {
 
+    if(programState != 4) return;
+
     var options = {
-        strings: terminalStrings[count].strings,
+        strings: terminalStrings[terminalCounter].strings,
         typeSpeed: 40,
-        smartBackspace : terminalStrings[count].smartBackspace,
+        smartBackspace : terminalStrings[terminalCounter].smartBackspace,
         showCursor: false,
         onComplete: (self) => {
-            if(count < terminalStrings.length - 1) {
+            if(terminalCounter < terminalStrings.length - 1) {
                 var clone = $('.terminal-new-content').clone().removeClass('terminal-new-content').addClass('terminal-content-line');
                 $('#terminal-content').append(clone);
                 $('.terminal-new-content #terminal-typing').html('');
 
-                count++;
+                terminalCounter++;
                 runTerminalGUI();
             }
         }
@@ -399,6 +424,15 @@ function updateConnectedPlanets() {
     }).catch(function(error) {
         console.log('Request failed', error);
     });
+}
+
+function resetProgramTimer() {
+    if((programState != 1 || programState != 4) && programInactive) {
+        resetProgram();
+        programInactive = false;
+        return;
+    }
+    programInactive = true;
 }
 
 function randomIntFromInterval(min, max) {
