@@ -109,13 +109,13 @@ function Planet(xPos, yPos, dia, name, id) {
     // Show the planet
     this.display = function() {
 
-        if(this.hasFocus && !this.isConnectionActive) {
+        if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
             strokeWeight(2);
             stroke(100);
             fill(100);
             ellipse(this.x, this.y, this.diameter, this.diameter);
 
-        } else if(this.hasFocus) {
+        } else if(this.hasFocus && (programState == 3 || programState == 4)) {
             strokeWeight(3);
             stroke(255);
             fill(255);
@@ -176,7 +176,6 @@ $(document).ready(function() {
     // Handle incomming websocket messages
     connection.onmessage = function (event) {
       var websocket_data = event.data;
-
       console.log(websocket_data);
 
       if(websocket_data.includes('QUESTION')) {
@@ -237,6 +236,9 @@ $(document).ready(function() {
     });
 });
 
+/*
+ * Change to a specific program state
+ */
 function changeState(newState) {
     switch(newState) {
         case 1:
@@ -254,12 +256,18 @@ function changeState(newState) {
     }
 }
 
+/*
+ * Change to program state 2
+ */
 function changeToState2() {
     programState = 2;
     $('main').attr('data-state', 2);
     $('#question-input-field').focus();
 }
 
+/*
+ * Change to program state 3
+ */
 function changeToState3() {
     var questionText = $('#question-input-field').val().trim();
 
@@ -274,12 +282,13 @@ function changeToState3() {
 
     programState = 3;
     $('main').attr('data-state', 3);
-    planets[randomIntFromInterval(1, NO_OF_PLANETS - 2)].setFocus(); // pick a random planet to be active. But not the first or last, that looks ugly
     showPlanetNames = true;
 }
 
+/*
+ * Change to program state 4
+ */
 function changeToState4() {
-
     programState = 4;
     $('main').attr('data-state', 4);
 
@@ -324,6 +333,9 @@ function changeToState4() {
     }, 1000);
 }
 
+/*
+ * Run program state 2
+ */
 function runState2(e) {
     // Check for accepted keys
     if (([8, 9, 13, 16, 32, 37, 38, 39, 40, 186, 222, 219, 189].indexOf(e.which) > -1) || // backspace, tab, enter, shift, space, arrow keys, æøå, dash
@@ -351,6 +363,9 @@ function runState2(e) {
     }
 }
 
+/*
+ * Run program state 3
+ */
 function runState3(e) {
     e.preventDefault();
     if((e.which >= 49 && e.which <= 56)) {
@@ -366,11 +381,33 @@ function runState3(e) {
     }
 }
 
+/*
+ * Run program state 4
+ */
 function runState4() {
+    programInactive = false;
     runTerminalGUI();
 }
 
+/*
+ * Reset the program timer (so whenever there has been activity, the 'countdown' starts over)
+ */
+function resetProgramTimer() {
+    if((programState != 1 || programState != 4) && programInactive) {
+        resetProgram();
+        programInactive = false;
+        return;
+    }
+    programInactive = true;
+}
+
+/*
+ * Reset program and start in state 2
+ */
 function resetProgram() {
+
+    updateConnectedPlanets();
+
     programState = 1;
     showPlanetNames = false;
     for(var i = 0; i < NO_OF_PLANETS; i++) {
@@ -383,38 +420,41 @@ function resetProgram() {
     $('main').attr('data-state', 1);
 }
 
-var terminalStrings = [
-    {
-        strings: ['', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading complete'],
-        smartBackspace: true,
-        typeSpeed: 200
-    },
-    {
-        strings: ['', 'Initializing transmission'],
-        smartBackspace: false,
-        typeSpeed: 40
-    },
-    {
-        strings: ['', 'npm install^1000\n `installing components...` ^1000\n `Fetching from source...`'],
-        smartBackspace: false,
-        typeSpeed: 40
-    },
-    {
-        strings: ['', 'Transmission COMPLETE'],
-        smartBackspace: false,
-        typeSpeed: 40
-    },
-    {
-        strings: ['', '.', '..', '...'],
-        smartBackspace: true,
-        typeSpeed: 40
-    }
-];
 
-
+/*
+ * Write things in the "terminal"
+ */
 function runTerminalGUI() {
 
     if(programState != 4) return;
+
+    var terminalStrings = [
+        {
+            strings: ['', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading complete'],
+            smartBackspace: true,
+            typeSpeed: 200
+        },
+        {
+            strings: ['', 'Initializing transmission'],
+            smartBackspace: false,
+            typeSpeed: 40
+        },
+        {
+            strings: ['', 'npm install^1000\n `installing components...` ^1000\n `Fetching from source...`'],
+            smartBackspace: false,
+            typeSpeed: 40
+        },
+        {
+            strings: ['', 'Transmission COMPLETE'],
+            smartBackspace: false,
+            typeSpeed: 40
+        },
+        {
+            strings: ['', '.', '..', '...'],
+            smartBackspace: true,
+            typeSpeed: 40
+        }
+    ];
 
     var options = {
         strings: terminalStrings[terminalCounter].strings,
@@ -430,13 +470,21 @@ function runTerminalGUI() {
                 terminalCounter++;
                 runTerminalGUI();
             }
+            else {
+                setTimeout(function() {
+                    resetProgram();
+                }, 3000);
+            }
         }
     }
 
     var typed = new Typed('.terminal-new-content #terminal-typing ', options);
 }
 
-
+/*
+ * Update which plantes are connected.
+ * Is called once in the beginning of the program and then everytime the program is reset
+ */
 function updateConnectedPlanets() {
     fetch('/api/currentArduinoClients')
     .then(req_status)
@@ -464,22 +512,18 @@ function updateConnectedPlanets() {
     });
 }
 
+/*
+ * Scroll to a question starter
+ * Can be initialized both by pressing up/down or by the TUI
+ */
 function scrollToQuestion(scrollTo) {
+    if(programState != 2) return;
 
     var targetPos = -(50 * scrollTo);
     $('#question-starter-rotator').animate({top: targetPos + 'px'}, '200');
 
     $('#question-starter-rotator .focus').removeClass('focus');
     $('#question-starter-rotator span:nth-of-type(' + (parseInt(scrollTo) + 1) + ')').addClass('focus');
-}
-
-function resetProgramTimer() {
-    if((programState != 1 || programState != 4) && programInactive) {
-        resetProgram();
-        programInactive = false;
-        return;
-    }
-    programInactive = true;
 }
 
 function randomIntFromInterval(min, max) {
