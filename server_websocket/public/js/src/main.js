@@ -6,14 +6,16 @@
     4 = Transmit and recieve
 */
 var programState = 1;
-var question_pot_position;
-var planet_pot_position;
+var errorAudio = new Audio('sound/error.mp3');
 
-var RESET_TIME = 30000;
+
+var RESET_TIME = 60000;
 var programInactive = false;
 
 var terminalCounter = 0;
 
+var chosenQuestionStarter = 0;
+var chosenPlanet;
 
 // Planet setup
 var NO_OF_PLANETS = 8;
@@ -173,13 +175,38 @@ $(document).ready(function() {
 
     // Handle incomming websocket messages
     connection.onmessage = function (event) {
-      console.log(event.data);
       var websocket_data = event.data;
 
-      if(websocket_data.includes('QUESTION_POT')) {
-        question_pot_position = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
-      } else if(websocket_data.includes('PLANET_POT')) {
-        planet_pot_position = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+      console.log(websocket_data);
+
+      if(websocket_data.includes('QUESTION')) {
+        chosenQuestionStarter = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+        scrollToQuestion(chosenQuestionStarter);
+
+      } else if(websocket_data.includes('PLANET')) {
+        chosenPlanet = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+        for(var i = 0; i < NO_OF_PLANETS; i++) {
+            planets[i].removeFocus();
+        }
+        planets[chosenPlanet].setFocus();
+
+      } else if(websocket_data.includes('BUTTON')) {
+        var buttonType = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+
+        if(buttonType == 'BACK') {
+            resetProgram();
+        } else if(buttonType == 'CONTINUE') {
+            if(programState < 4) changeState(programState + 1);
+
+        } else if(buttonType == 'TRANSMIT') {
+            // If we're in state 3 that's cool, else tell user not to push this yet
+            if(programState == 3) {
+                changeToState4();
+            } else {
+                errorAudio.play();
+                $('#transmission-not-ready').show().addClass('popup-open');
+            }
+        }
       }
 
     }
@@ -208,8 +235,24 @@ $(document).ready(function() {
             runState3(e);
         }
     });
-
 });
+
+function changeState(newState) {
+    switch(newState) {
+        case 1:
+            resetProgram();
+            break;
+        case 2:
+            changeToState2();
+            break;
+        case 3:
+            changeToState3();
+            break;
+        case 4:
+            changeToState4();
+            break;
+    }
+}
 
 function changeToState2() {
     programState = 2;
@@ -217,18 +260,42 @@ function changeToState2() {
     $('#question-input-field').focus();
 }
 
-function changeToState3(questionStarter, questionText) {
+function changeToState3() {
+    var questionText = $('#question-input-field').val().trim();
+
+    if(!questionText || 0 === questionText.length) {
+        errorAudio.play();
+        $('#missing-input').show().addClass('popup-open');
+        return;
+    }
+
+    var questionStarter = $('#question-starter-rotator .focus').text();
+    $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
+
     programState = 3;
     $('main').attr('data-state', 3);
     planets[randomIntFromInterval(1, NO_OF_PLANETS - 2)].setFocus(); // pick a random planet to be active. But not the first or last, that looks ugly
     showPlanetNames = true;
-
-    $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
 }
 
-function changeToState4(planetId) {
+function changeToState4() {
+
     programState = 4;
     $('main').attr('data-state', 4);
+
+    var planetId;
+    for(var i = 0; i < NO_OF_PLANETS; i++) {
+        if(planets[i].hasFocus) {
+            if(!planets[i].isConnectionActive) {
+                // TODO: Change the error message (make array and select random)
+                errorAudio.play();
+                $('#unavailable-planet').show().addClass('popup-open');
+                return;
+            }
+
+            planetId = i;
+        }
+    }
 
     var data = {
         question : $('#asking-question-container').text(),
@@ -266,31 +333,21 @@ function runState2(e) {
         // Navigate in question starts
         if(e.which == 38) { // up
             e.preventDefault();
-            $('#question-starter-rotator').animate({top: '+=50px'});
-            $('#question-starter-rotator .focus').removeClass('focus').prev().addClass('focus');
+            chosenQuestionStarter--;
+            scrollToQuestion(chosenQuestionStarter);
 
         } else if (e.which == 40 || e.which == 9) { // down
             e.preventDefault();
-            $('#question-starter-rotator').animate({top: '-=50px'});
-            $('#question-starter-rotator .focus').removeClass('focus').next().addClass('focus');
+            chosenQuestionStarter++
+            scrollToQuestion(chosenQuestionStarter);
         }
 
         // Enter
         if(e.which == 13) {
-            var questionText = $('#question-input-field').val().trim();
-            if(!questionText || 0 === questionText.length) {
-                var audio = new Audio('sound/error.mp3');
-                audio.play();
-                $('#missing-input').show().addClass('popup-open');
-                return;
-            } else {
-                var questionStarter = $('#question-starter-rotator .focus').text();
-                changeToState3(questionStarter, questionText);
-            }
+            changeToState3();
         }
     } else {
         e.preventDefault();
-        console.log('not one of those');
     }
 }
 
@@ -300,29 +357,12 @@ function runState3(e) {
         for(var i = 0; i < NO_OF_PLANETS; i++) {
             planets[i].removeFocus();
         }
-        var planetToFocusOn = e.which - 49;
-        planets[planetToFocusOn].setFocus();
+        chosenPlanet = e.which - 49;
+        planets[chosenPlanet].setFocus();
 
 
     } else if (e.which == 13) {
-
-        var chosenPlanet;
-        for(var i = 0; i < NO_OF_PLANETS; i++) {
-            if(planets[i].hasFocus) {
-                console.log('Planet number %i, %s, has focus', i, planets[i].name);
-
-                if(!planets[i].isConnectionActive) {
-                    // TODO: Change the error message (make array and select random)
-                    var audio = new Audio('sound/error.mp3');
-                    audio.play();
-                    $('#unavailable-planet').show().addClass('popup-open');
-                    return;
-                }
-
-                chosenPlanet = i;
-                changeToState4(chosenPlanet);
-            }
-        }
+        changeToState4();
     }
 }
 
@@ -341,9 +381,7 @@ function resetProgram() {
     $('#terminal-content').html('');
     $('.terminal-new-content #terminal-typing').html('');
     $('main').attr('data-state', 1);
-
 }
-
 
 var terminalStrings = [
     {
@@ -426,6 +464,15 @@ function updateConnectedPlanets() {
     });
 }
 
+function scrollToQuestion(scrollTo) {
+
+    var targetPos = -(50 * scrollTo);
+    $('#question-starter-rotator').animate({top: targetPos + 'px'}, '200');
+
+    $('#question-starter-rotator .focus').removeClass('focus');
+    $('#question-starter-rotator span:nth-of-type(' + (parseInt(scrollTo) + 1) + ')').addClass('focus');
+}
+
 function resetProgramTimer() {
     if((programState != 1 || programState != 4) && programInactive) {
         resetProgram();
@@ -441,8 +488,6 @@ function randomIntFromInterval(min, max) {
 
 
 function req_status(response) {
-    console.log('Determining status');
-    console.log(response.status);
     if (response.status >= 200 && response.status < 300) {
         return Promise.resolve(response)
     } else {
@@ -451,6 +496,5 @@ function req_status(response) {
 }
 
 function req_json(response) {
-    console.log('Process response json');
     return response.json();
 }

@@ -1,4 +1,6 @@
 var serialPort = require('serialport');
+const readline = serialPort.parsers.Readline;
+
 var currentData = '';
 
 var websocket_helpers = require('../services/websocket_helpers');
@@ -17,22 +19,23 @@ function createSerialPort() {
   });
 
   promise.then(function(usbport) {
-
     // Create serial port connection
     var port = new serialPort(usbport, {
       baudRate: 9600
     });
 
+    const parser = port.pipe(new readline({ delimiter: '\r\n' }));
+
     // Read data that is available but keep the stream from entering "flowing mode"
-    port.on('readable', function () {
-        var data = port.read().toString('utf8').trim();
-        if (data.includes('BACK') || data.includes('FORWARD') || data.includes('QUESTION_POT') || data.includes('PLANET_POT')) {
-          websocket_helpers.sendToGUI(data);
-        }
+    parser.on('data', function (data) {
+      if (data.includes('BUTTON') || data.includes('QUESTION') || data.includes('PLANET')) {
+        websocket_helpers.sendToGUI(data);
+      }
     });
   }, function(err) {
     console.log(err);
   });
+
 }
 
 function getLastSerialPortData() {
