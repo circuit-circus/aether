@@ -22,42 +22,42 @@ var NO_OF_PLANETS = 8;
 var planets = [];
 var planetData = [
     {
-        'name' : 'JSPR92',
+        'name' : 'EM-6',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 0
     },
     {
-        'name' : 'TX9600',
+        'name' : 'MDAcom-86',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 1
     },
     {
-        'name' : 'VSOVS-io 8',
+        'name' : 'Grp/M',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 2
     },
     {
-        'name' : 'NN-05',
+        'name' : 'WAVE',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 3
     },
     {
-        'name' : 'CRCTCRCS2015x',
+        'name' : 'SERAHS-M1nd',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 4
     },
     {
-        'name' : 'Mediacom',
+        'name' : 'JSPR92',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 5
     },
     {
-        'name' : 'GroupM',
+        'name' : 'NN-05',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 6
     },
     {
-        'name' : 'm6',
+        'name' : 'VSOVS-io 8',
         'diameter' : randomIntFromInterval(70, 110),
         'id' : 7
     }

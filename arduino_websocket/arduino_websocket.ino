@@ -1,42 +1,82 @@
-#include <FastLED.h>
 #include <ArduinoHttpClient.h>
 #include <WiFi101.h>
 #include "config.h"
+#include <AetherLED.h>
 
 // Adress and port of the Raspberry Pi with the Node Server on
 char serverAddress[] = "192.168.43.72";
 int port = 8080;
 
 // ID of this device
-String thisArduinoID = "1";
+int thisArduinoID = 0;
+String thisArduinoIDStr = String(thisArduinoID);
 bool hasSentID = false;
 
 WiFiClient wifi;
 WebSocketClient client = WebSocketClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
 
-
-#define LED_PIN     5
-#define NUM_LEDS    150
-#define BRIGHTNESS  64
-#define LED_TYPE    WS2812B
-#define COLOR_ORDER GRB
-CRGB leds[NUM_LEDS];
-
-#define BRIGHTNESS          96
-#define FRAMES_PER_SECOND  120
-
-uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-
 bool shouldRunAnimation = false;
 unsigned long beginLEDsMillis = 0;        // will store last time LED was updated
 const long durationLEDs = 5000;           // interval at which to blink (milliseconds)
 
+byte planetHues[8] = {
+  160, // M/six
+  224, // Mediacom
+  160, // GroupM
+  32, // Wavemakers
+  192, // Mindshares
+  96, // JSPR-92
+  64, // NN-05
+  0 // VSOVS-io 8
+};
+
+// LED Variables
+#define DATA_PIN_CORE 6
+#define NUM_LEDS_CORE 31
+AetherLED<DATA_PIN_CORE, NUM_LEDS_CORE> core;
+CHSV ledColorCore = CHSV(planetHues[thisArduinoID], 255, 255);
+
+#define DATA_PIN_ONE 7
+#define NUM_LEDS_ONE 90
+AetherLED<DATA_PIN_ONE, NUM_LEDS_ONE> ringOne;
+CHSV ledColorOne = CHSV(planetHues[thisArduinoID], 255, 255);
+
+#define DATA_PIN_TWO 8
+#define NUM_LEDS_TWO 90
+AetherLED<DATA_PIN_TWO, NUM_LEDS_TWO> ringTwo;
+CHSV ledColorTwo = CHSV(planetHues[thisArduinoID], 255, 255);
+
+#define DATA_PIN_THREE 9
+#define NUM_LEDS_THREE 90
+AetherLED<DATA_PIN_THREE, NUM_LEDS_THREE> ringThree;
+CHSV ledColorThree = CHSV(planetHues[thisArduinoID], 255, 255);
 
 void setup() {
   Serial.begin(9600);
 
   pinMode(LED_BUILTIN, OUTPUT);
+
+  Serial.println("Initializing LEDs");
+  core.attach();
+  core.setSnakeSpeed(500);
+  core.setBackgroundColor(ledColorCore);
+  core.setSnakeDirection(+1);
+
+  ringOne.attach();
+  ringOne.setSnakeSpeed(30);
+  ringOne.setSnakeIndex(0);
+  ringOne.setSnakeDirection(+1);
+
+  ringTwo.attach();
+  ringTwo.setSnakeSpeed(30);
+  ringTwo.setSnakeIndex(0);
+  ringTwo.setSnakeDirection(-1);
+
+  ringThree.attach();
+  ringThree.setSnakeSpeed(30);
+  ringThree.setSnakeIndex(45);
+  ringThree.setSnakeDirection(+1);
 
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to Network named: ");
@@ -54,10 +94,7 @@ void setup() {
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
-
-  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness(  BRIGHTNESS );
-  }
+}
 
 void loop() {
   Serial.println("starting WebSocket client");
@@ -69,7 +106,7 @@ void loop() {
       // Send a message
       client.beginMessage(TYPE_TEXT);
       client.print("MY_ID");
-      client.print(thisArduinoID);
+      client.print(thisArduinoIDStr);
       client.endMessage();
 
       hasSentID = true;
@@ -84,7 +121,7 @@ void loop() {
       Serial.println(msg);
 
       // If the message is to this device, do something
-      if(msg == thisArduinoID) {
+      if(msg == thisArduinoIDStr) {
         shouldRunAnimation = true;
         beginLEDsMillis = millis();
         Serial.println("START Animation");
@@ -105,10 +142,11 @@ void loop() {
       Serial.println(currentMillis - beginLEDsMillis);
       runLEDS();
     } else { // Clear
-      for(int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = CRGB::Black;
-        FastLED.show();
-      }
+      core.turnOffLeds();
+      ringOne.turnOffLeds();
+      ringTwo.turnOffLeds();
+      ringThree.turnOffLeds();
+      FastLED.show();
     }
 
   }
@@ -118,14 +156,10 @@ void loop() {
 }
 
 void runLEDS() {
-  // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
-  leds[pos] += CHSV( gHue + random8(64), 200, 255);
+  core.runSnakeAnimation(ledColorCore, true, true, true);
+  ringOne.runSnakeAnimation(ledColorOne, true, true, false);
+  ringTwo.runSnakeAnimation(ledColorTwo, true, true, false);
+  ringThree.runSnakeAnimation(ledColorThree, true, true, false);
 
-  FastLED.show();  
-  //FastLED.delay(1000/FRAMES_PER_SECOND); 
+  FastLED.show();
 }
-
-
-
