@@ -4,7 +4,7 @@
 #include <AetherLED.h>
 
 // Adress and port of the Raspberry Pi with the Node Server on
-char serverAddress[] = "192.168.43.72";
+char serverAddress[] = "192.168.43.198";
 int port = 8080;
 
 // ID of this device
@@ -142,14 +142,20 @@ void loop() {
       Serial.println(currentMillis - beginLEDsMillis);
       runLEDS();
     } else { // Clear
-      core.turnOffLeds();
-      ringOne.turnOffLeds();
-      ringTwo.turnOffLeds();
-      ringThree.turnOffLeds();
+      core.runSnakeAnimation(ledColorCore, false, false, false);
+      ringOne.runSnakeAnimation(ledColorOne, false, false, false);
+      ringTwo.runSnakeAnimation(ledColorTwo, false, false, false);
+      ringThree.runSnakeAnimation(ledColorThree, false, false, false);
       FastLED.show();
     }
 
   }
+
+  core.runSnakeAnimation(CHSV(ledColorCore.hue, 120, ledColorCore.value), false, false, false);
+  ringOne.runSnakeAnimation(CHSV(ledColorOne.hue, 120, ledColorOne.value), false, false, false);
+  ringTwo.runSnakeAnimation(CHSV(ledColorTwo.hue, 120, ledColorTwo.value), false, false, false);
+  ringThree.runSnakeAnimation(CHSV(ledColorThree.hue, 120, ledColorThree.value), false, false, false);
+  FastLED.show();
 
   Serial.println("Disconnected");
   hasSentID = false;
