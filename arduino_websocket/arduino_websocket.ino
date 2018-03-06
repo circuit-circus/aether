@@ -60,21 +60,24 @@ void setup() {
   Serial.println("Initializing LEDs");
   core.attach();
   core.setSnakeSpeed(500);
-  core.setBackgroundColor(ledColorCore);
+  core.setBackgroundColor(CHSV(ledColorCore.hue, 120, ledColorCore.value));
   core.setSnakeDirection(+1);
 
   ringOne.attach();
   ringOne.setSnakeSpeed(30);
+  ringOne.setBackgroundColor(CHSV(ledColorOne.hue, 120, ledColorOne.value));
   ringOne.setSnakeIndex(0);
   ringOne.setSnakeDirection(+1);
 
   ringTwo.attach();
   ringTwo.setSnakeSpeed(30);
+  ringTwo.setBackgroundColor(CHSV(ledColorTwo.hue, 120, ledColorTwo.value));
   ringTwo.setSnakeIndex(0);
   ringTwo.setSnakeDirection(-1);
 
   ringThree.attach();
   ringThree.setSnakeSpeed(30);
+  ringThree.setBackgroundColor(CHSV(ledColorThree.hue, 120, ledColorThree.value));
   ringThree.setSnakeIndex(45);
   ringThree.setSnakeDirection(+1);
 
@@ -142,19 +145,20 @@ void loop() {
       Serial.println(currentMillis - beginLEDsMillis);
       runLEDS();
     } else { // Clear
-      core.runSnakeAnimation(ledColorCore, false, false, false);
-      ringOne.runSnakeAnimation(ledColorOne, false, false, false);
-      ringTwo.runSnakeAnimation(ledColorTwo, false, false, false);
-      ringThree.runSnakeAnimation(ledColorThree, false, false, false);
+      core.runSnakeAnimation(ledColorCore, true, false, true);
+      ringOne.runSnakeAnimation(ledColorOne, true, false, true);
+      ringTwo.runSnakeAnimation(ledColorTwo, true, false, true);
+      ringThree.runSnakeAnimation(ledColorThree, true, false, true);
       FastLED.show();
     }
 
   }
 
-  core.runSnakeAnimation(CHSV(ledColorCore.hue, 120, ledColorCore.value), false, false, false);
-  ringOne.runSnakeAnimation(CHSV(ledColorOne.hue, 120, ledColorOne.value), false, false, false);
-  ringTwo.runSnakeAnimation(CHSV(ledColorTwo.hue, 120, ledColorTwo.value), false, false, false);
-  ringThree.runSnakeAnimation(CHSV(ledColorThree.hue, 120, ledColorThree.value), false, false, false);
+  // Disconnected animations
+  core.runSnakeAnimation(CHSV(ledColorCore.hue, 120, ledColorCore.value), true, false, true);
+  ringOne.runSnakeAnimation(CHSV(ledColorOne.hue, 120, ledColorOne.value), true, false, true);
+  ringTwo.runSnakeAnimation(CHSV(ledColorTwo.hue, 120, ledColorTwo.value), true, false, true);
+  ringThree.runSnakeAnimation(CHSV(ledColorThree.hue, 120, ledColorThree.value), true, false, true);
   FastLED.show();
 
   Serial.println("Disconnected");
@@ -162,10 +166,10 @@ void loop() {
 }
 
 void runLEDS() {
-  core.runSnakeAnimation(ledColorCore, true, true, true);
-  ringOne.runSnakeAnimation(ledColorOne, true, true, false);
-  ringTwo.runSnakeAnimation(ledColorTwo, true, true, false);
-  ringThree.runSnakeAnimation(ledColorThree, true, true, false);
+  core.runSnakeAnimation(ledColorCore, false, true, false);
+  ringOne.runSnakeAnimation(ledColorOne, false, true, false);
+  ringTwo.runSnakeAnimation(ledColorTwo, false, true, false);
+  ringThree.runSnakeAnimation(ledColorThree, false, true, false);
 
   FastLED.show();
 }
