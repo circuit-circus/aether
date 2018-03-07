@@ -12,7 +12,7 @@ int totalPlanetPot = 0;                  // the running total
 int averagePlanetPot = 0;
 int planetVal;
 int lastPlanetVal = planetVal;
-const int NO_OF_QUESTIONS = 6;
+const int NO_OF_QUESTIONS = 8;
 
 const int backButtonPin = 2;
 int backButtonState;
@@ -58,7 +58,7 @@ void loop() {
 
   /* QUESTION (WHEEL) POTENTIOMETER */
   questionPotVal = analogRead(questionPotPin);
-  questionVal = map(questionPotVal, 0, 1023, 0, NO_OF_PLANETS-1);
+  questionVal = map(questionPotVal, 0, 1022, 0, NO_OF_QUESTIONS-1);
   if(questionVal != lastQuestionVal) {
     Serial.print("QUESTION: ");
     Serial.println(questionVal);
@@ -68,7 +68,7 @@ void loop() {
 
   /* PLANET SLIDER POTENTIOMETER */
   averagePlanetPot = calculatePlanetPotAverage();
-  planetVal = map(averagePlanetPot, 219, 956, 0, NO_OF_QUESTIONS-1);
+  planetVal = map(averagePlanetPot, 11, 1000, 0, NO_OF_PLANETS-1);
   if(planetVal != lastPlanetVal) {
     Serial.print("PLANET: ");
     Serial.println(planetVal);

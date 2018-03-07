@@ -39,8 +39,8 @@ function getConnectedArduinoClients() {
       }
     ];
 
-    return testArduinos;
-    //return connectedArduinoClients;
+    //return testArduinos;
+    return connectedArduinoClients;
 }
 
 // Broadcast a message to all connections

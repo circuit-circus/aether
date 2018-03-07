@@ -4,11 +4,11 @@
 #include <AetherLED.h>
 
 // Adress and port of the Raspberry Pi with the Node Server on
-char serverAddress[] = "192.168.43.198";
+char serverAddress[] = "192.168.43.252";
 int port = 8080;
 
 // ID of this device
-int thisArduinoID = 0;
+int thisArduinoID = 2 ;
 String thisArduinoIDStr = String(thisArduinoID);
 bool hasSentID = false;
 
@@ -32,12 +32,12 @@ byte planetHues[8] = {
 };
 
 // LED Variables
-#define DATA_PIN_CORE 6
+#define DATA_PIN_CORE 12
 #define NUM_LEDS_CORE 31
 AetherLED<DATA_PIN_CORE, NUM_LEDS_CORE> core;
 CHSV ledColorCore = CHSV(planetHues[thisArduinoID], 255, 255);
 
-#define DATA_PIN_ONE 7
+#define DATA_PIN_ONE 6
 #define NUM_LEDS_ONE 90
 AetherLED<DATA_PIN_ONE, NUM_LEDS_ONE> ringOne;
 CHSV ledColorOne = CHSV(planetHues[thisArduinoID], 255, 255);
@@ -47,7 +47,7 @@ CHSV ledColorOne = CHSV(planetHues[thisArduinoID], 255, 255);
 AetherLED<DATA_PIN_TWO, NUM_LEDS_TWO> ringTwo;
 CHSV ledColorTwo = CHSV(planetHues[thisArduinoID], 255, 255);
 
-#define DATA_PIN_THREE 9
+#define DATA_PIN_THREE 10
 #define NUM_LEDS_THREE 90
 AetherLED<DATA_PIN_THREE, NUM_LEDS_THREE> ringThree;
 CHSV ledColorThree = CHSV(planetHues[thisArduinoID], 255, 255);
@@ -143,23 +143,45 @@ void loop() {
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.println("Running leds:");
       Serial.println(currentMillis - beginLEDsMillis);
-      runLEDS();
-    } else { // Clear
-      core.runSnakeAnimation(ledColorCore, true, false, true);
-      ringOne.runSnakeAnimation(ledColorOne, true, false, true);
-      ringTwo.runSnakeAnimation(ledColorTwo, true, false, true);
-      ringThree.runSnakeAnimation(ledColorThree, true, false, true);
+      
+      core.setAllHSV(CHSV(ledColorOne.hue, 255, 255));
+      ringOne.setAllHSV(CHSV(ledColorOne.hue, 255, 255));
+      ringTwo.setAllHSV(CHSV(ledColorTwo.hue, 255, 255));
+      ringThree.setAllHSV(CHSV(ledColorThree.hue, 255, 255));
       FastLED.show();
+      
+    } else { // Clear
+      core.setAllHSV(CHSV(ledColorOne.hue, 100, 255));
+      ringOne.setAllHSV(CHSV(ledColorOne.hue, 100, 255));
+      ringTwo.setAllHSV(CHSV(ledColorTwo.hue, 100, 255));
+      ringThree.setAllHSV(CHSV(ledColorThree.hue, 100, 255));
+      FastLED.show();
+
+      /*
+      core.runSnakeAnimation(ledColorCore, true, false, true);
+      ringOne.runSnakeAnimation(CHSV( 0, 255, 255), true, false, true);
+      ringTwo.runSnakeAnimation(CHSV( 0, 255, 255), true, false, true);
+      ringThree.runSnakeAnimation(CHSV( 0, 255, 255), true, false, true);
+      */
+      
     }
 
   }
 
   // Disconnected animations
+  core.setAllHSV(CHSV(ledColorOne.hue, 20, 50));
+  ringOne.setAllHSV(CHSV(ledColorOne.hue, 20, 50));
+  ringTwo.setAllHSV(CHSV(ledColorTwo.hue, 20, 50));
+  ringThree.setAllHSV(CHSV(ledColorThree.hue, 20, 50));
+  FastLED.show();
+
+  /*
   core.runSnakeAnimation(CHSV(ledColorCore.hue, 120, ledColorCore.value), true, false, true);
   ringOne.runSnakeAnimation(CHSV(ledColorOne.hue, 120, ledColorOne.value), true, false, true);
   ringTwo.runSnakeAnimation(CHSV(ledColorTwo.hue, 120, ledColorTwo.value), true, false, true);
   ringThree.runSnakeAnimation(CHSV(ledColorThree.hue, 120, ledColorThree.value), true, false, true);
   FastLED.show();
+  */
 
   Serial.println("Disconnected");
   hasSentID = false;
