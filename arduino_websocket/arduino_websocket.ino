@@ -4,11 +4,11 @@
 #include <AetherLED.h>
 
 // Adress and port of the Raspberry Pi with the Node Server on
-char serverAddress[] = "192.168.43.252";
+char serverAddress[] = "192.168.43.155";
 int port = 8080;
 
 // ID of this device
-int thisArduinoID = 2 ;
+const int thisArduinoID = 2;
 String thisArduinoIDStr = String(thisArduinoID);
 bool hasSentID = false;
 
@@ -20,37 +20,40 @@ bool shouldRunAnimation = false;
 unsigned long beginLEDsMillis = 0;        // will store last time LED was updated
 const long durationLEDs = 5000;           // interval at which to blink (milliseconds)
 
-byte planetHues[8] = {
-  160, // M/six
-  224, // Mediacom
-  160, // GroupM
-  32, // Wavemakers
-  192, // Mindshares
-  96, // JSPR-92
-  64, // NN-05
-  0 // VSOVS-io 8
+// ID, HUE, no of LEDs ring 1, no of LEDs ring 2, no of LEDs ring 3
+constexpr int planets[8][5] = {
+  {0, 160, 90, 72, 54}, // 3 rings
+  {1, 224, 90, 90, 90}, // sphere
+  {2, 160, 80, 60, 0}, // 2 rings
+  {3, 32, 90, 90, 90}, // sphere
+  {4, 192, 90, 72, 54}, // 3 rings
+  {5, 96, 90, 90, 90}, // sphere
+  {6, 64, 80, 60, 0}, // 2 rings
+  {7, 0, 90, 90, 90} // 3 rings
 };
 
+
 // LED Variables
+#define DATA_PIN_ONE 6
+const int NUM_LEDS_ONE = planets[thisArduinoID][2];
+AetherLED<DATA_PIN_ONE, NUM_LEDS_ONE> ringOne;
+CHSV ledColorOne = CHSV(planets[thisArduinoID][1], 255, 255);
+
+#define DATA_PIN_TWO 8
+const int NUM_LEDS_TWO = planets[thisArduinoID][3];
+AetherLED<DATA_PIN_TWO, NUM_LEDS_TWO> ringTwo;
+CHSV ledColorTwo = CHSV(planets[thisArduinoID][1], 255, 255);
+
+#define DATA_PIN_THREE 10
+const int NUM_LEDS_THREE = planets[thisArduinoID][4];
+AetherLED<DATA_PIN_THREE, NUM_LEDS_THREE> ringThree;
+CHSV ledColorThree = CHSV(planets[thisArduinoID][1], 255, 255);
+
 #define DATA_PIN_CORE 12
 #define NUM_LEDS_CORE 31
 AetherLED<DATA_PIN_CORE, NUM_LEDS_CORE> core;
-CHSV ledColorCore = CHSV(planetHues[thisArduinoID], 255, 255);
+CHSV ledColorCore = CHSV(planets[thisArduinoID][1], 255, 255);
 
-#define DATA_PIN_ONE 6
-#define NUM_LEDS_ONE 90
-AetherLED<DATA_PIN_ONE, NUM_LEDS_ONE> ringOne;
-CHSV ledColorOne = CHSV(planetHues[thisArduinoID], 255, 255);
-
-#define DATA_PIN_TWO 8
-#define NUM_LEDS_TWO 90
-AetherLED<DATA_PIN_TWO, NUM_LEDS_TWO> ringTwo;
-CHSV ledColorTwo = CHSV(planetHues[thisArduinoID], 255, 255);
-
-#define DATA_PIN_THREE 10
-#define NUM_LEDS_THREE 90
-AetherLED<DATA_PIN_THREE, NUM_LEDS_THREE> ringThree;
-CHSV ledColorThree = CHSV(planetHues[thisArduinoID], 255, 255);
 
 void setup() {
   Serial.begin(9600);
