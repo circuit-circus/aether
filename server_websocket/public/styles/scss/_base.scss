@@ -58,6 +58,10 @@ main {
 }
 
 main[data-state='1'] {
+  #planet-container {
+    opacity: 0;
+  }
+
   #start-container {
     opacity: 1;
   }
@@ -66,6 +70,7 @@ main[data-state='1'] {
 main[data-state='2'] {
   #planet-container canvas {
     transform: scale(0.5) translateY(-250px);
+    opacity: 1;
   }
 
   #input-container {

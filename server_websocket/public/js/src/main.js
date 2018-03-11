@@ -24,46 +24,56 @@ var planetData = [
     {
         'name' : 'EM-6',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 0
+        'id' : 0,
+        'type' : '3RING'
     },
     {
         'name' : 'MDAcom-86',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 1
+        'id' : 1,
+        'type' : 'SPHERE'
     },
     {
         'name' : 'Grp/M',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 2
+        'id' : 2,
+        'type' : '2RING'
     },
     {
         'name' : 'WAVE',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 3
+        'id' : 3,
+        'type' : 'SPHERE'
     },
     {
         'name' : 'SERAHS-M1nd',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 4
+        'id' : 4,
+        'type' : '3RING'
     },
     {
         'name' : 'JSPR92',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 5
+        'id' : 5,
+        'type' : '2RING'
     },
     {
         'name' : 'NN-05',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 6
+        'id' : 6,
+        'type' : 'SPHERE'
     },
     {
         'name' : 'VSOVS-io 8',
         'diameter' : randomIntFromInterval(70, 110),
-        'id' : 7
+        'id' : 7,
+        'type' : '3RING'
     }
 ];
 
 var showPlanetNames = false;
+var theta = 0.219;
+var dtheta = 0.060;
 
 // p5 SETUP
 function setup() {
@@ -76,7 +86,7 @@ function setup() {
 
     for(var i = 0; i < NO_OF_PLANETS; i++) {
         var pos = i * 125 + ((125-planetData[i].diameter) / 2 + planetData[i].diameter/2);
-        planets[i] = new Planet(pos, 200, planetData[i].diameter, planetData[i].name, planetData[i].id);
+        planets[i] = new Planet(pos, 200, planetData[i].diameter, planetData[i].name, planetData[i].id, planetData[i].type);
     }
 
     updateConnectedPlanets();
@@ -92,49 +102,108 @@ function draw() {
 }
 
 // Planet class
-function Planet(xPos, yPos, dia, name, id) {
+function Planet(xPos, yPos, dia, name, id, type) {
     this.x = xPos;
     this.y = yPos;
     this.diameter = dia;
     this.name = name;
     this.id = id;
+    this.type = type;
+    this.theta = theta;
+    this.dtheta = dtheta;
 
     this.isConnectionActive = true; // Is there a connection to the planet
 
     this.hasFocus = false; // Is the planet selected in the GUI (step 3)
 
-    this.theta = random(PI / 10);
-    this.dtheta = random(0.01, 0.1);
-
     // Show the planet
     this.display = function() {
 
+        noFill();
+
+        // The user is focusing on the planet, but it is inactive
         if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
             strokeWeight(2);
             stroke(100);
-            fill(100);
-            ellipse(this.x, this.y, this.diameter, this.diameter);
 
+            if(this.type == 'SPHERE') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter, 20);
+                ellipse(this.x, this.y, 20, this.diameter);
+            } else if(this.type == '2RING') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
+            } else if(this.type == '3RING') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter - 20, this.diameter - 20);
+                ellipse(this.x, this.y, this.diameter - 40, this.diameter - 40);
+            } else {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+            }
+
+        // The user is focusing on the planet and it's good
         } else if(this.hasFocus && (programState == 3 || programState == 4)) {
             strokeWeight(3);
             stroke(255);
-            fill(255);
 
             this.theta += this.dtheta;
             var r = this.diameter + (this.diameter * (sin(this.theta) + 1) / 10);
-            ellipse(this.x, this.y, r, r);
+            var rSphere = 20 + (20 * (sin(this.theta) + 1) / 10);
 
+            if(this.type == 'SPHERE') {
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r, rSphere);
+                ellipse(this.x, this.y, rSphere, r);
+            } else if(this.type == '2RING') {
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r - 30, r - 30);
+            } else if(this.type == '3RING') {
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r - 20, r - 20);
+                ellipse(this.x, this.y, r - 40, r - 40);
+            } else {
+                ellipse(this.x, this.y, r, r);
+            }
+
+        // The planet is not active (and no focus on it)
         } else if (!this.isConnectionActive) {
             strokeWeight(2);
-            fill(0);
             stroke(100);
-            ellipse(this.x, this.y, this.diameter, this.diameter);
 
+            if(this.type == 'SPHERE') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter, 20);
+                ellipse(this.x, this.y, 20, this.diameter);
+            } else if(this.type == '2RING') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
+            } else if(this.type == '3RING') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter - 20, this.diameter - 20);
+                ellipse(this.x, this.y, this.diameter - 40, this.diameter - 40);
+            } else {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+            }
+
+        // The planet active (and no focus on it)
         } else {
             strokeWeight(2);
-            fill(0);
             stroke(255);
-            ellipse(this.x, this.y, this.diameter, this.diameter);
+
+            if(this.type == 'SPHERE') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter, 20);
+                ellipse(this.x, this.y, 20, this.diameter);
+            } else if(this.type == '2RING') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
+            } else if(this.type == '3RING') {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, this.diameter - 20, this.diameter - 20);
+                ellipse(this.x, this.y, this.diameter - 40, this.diameter - 40);
+            } else {
+                ellipse(this.x, this.y, this.diameter, this.diameter);
+            }
         }
 
         if(showPlanetNames) {
