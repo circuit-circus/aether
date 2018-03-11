@@ -343,12 +343,12 @@ function runState2(e) {
         (e.which >= 65 && e.which <= 90) ) { // letters
 
         // Navigate in question starts
-        if(e.which == 38) { // up
+        if(e.which == 38 && chosenQuestionStarter > 0) { // up
             e.preventDefault();
             chosenQuestionStarter--;
             scrollToQuestion(chosenQuestionStarter);
 
-        } else if (e.which == 40 || e.which == 9) { // down
+        } else if ((e.which == 40 || e.which == 9) && chosenQuestionStarter < 7) { // down or tab
             e.preventDefault();
             chosenQuestionStarter++
             scrollToQuestion(chosenQuestionStarter);
@@ -520,7 +520,7 @@ function scrollToQuestion(scrollTo) {
     if(programState != 2) return;
 
     var targetPos = -(50 * scrollTo);
-    $('#question-starter-rotator').animate({top: targetPos + 'px'}, '200');
+    $('#question-starter-rotator').css({top: targetPos + 'px'});
 
     $('#question-starter-rotator .focus').removeClass('focus');
     $('#question-starter-rotator span:nth-of-type(' + (parseInt(scrollTo) + 1) + ')').addClass('focus');

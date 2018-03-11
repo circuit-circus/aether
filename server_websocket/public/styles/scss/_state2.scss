@@ -29,6 +29,8 @@
   #question-starter-rotator {
     position: relative;
     transform: translateY(25px);
+    transition: top 400ms ease-in-out;
+    top: 0;
 
     span {
       width: 100%;
