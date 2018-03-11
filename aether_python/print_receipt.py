@@ -42,11 +42,9 @@ printer.setSize('S')
 
 aetherLogoPath = currentDirectory + "/images/aether.png"
 ccLogoPath = currentDirectory + "/images/cc-logo.png"
-groupmLogoPath = currentDirectory + "/images/groupm-logo.png"
 
 aetherLogoImg = Image.open(aetherLogoPath)
 ccLogoImg = Image.open(ccLogoPath)
-groupmLogoImg = Image.open(groupmLogoPath)
 
 printer.printImage(aetherLogoImg, True)
 
@@ -73,13 +71,9 @@ printer.println(questionAnswer)
 drawLine()
 
 printer.justify('C')
-printer.println("Tech developed by:")
+printer.println("Designed and developed by:")
 
 printer.printImage(ccLogoImg, True)
-
-printer.println("for")
-
-printer.printImage(groupmLogoImg, True)
 
 printer.feed(2)
 
