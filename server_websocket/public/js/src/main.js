@@ -16,6 +16,7 @@ var terminalCounter = 0;
 
 var chosenQuestionStarter = 0;
 var chosenPlanet;
+var lastSliderVal;
 
 // Planet setup
 var NO_OF_PLANETS = 8;
@@ -184,6 +185,7 @@ $(document).ready(function() {
 
       } else if(websocket_data.includes('PLANET')) {
         chosenPlanet = websocket_data.substring(websocket_data.indexOf(' '), websocket_data.length).trim();
+        lastSliderVal = chosenPlanet;
         for(var i = 0; i < NO_OF_PLANETS; i++) {
             planets[i].removeFocus();
         }
@@ -275,6 +277,15 @@ function changeToState3() {
         errorAudio.play();
         $('#missing-input').show().addClass('popup-open');
         return;
+    }
+
+    // If we have detected a sliderval in this session, use it to choose a planet
+    if(lastSliderVal !== undefined) {
+        planets[lastSliderVal].setFocus();
+    } else {
+        // Get random planet, if no sliderval has been detected yet (usually on first runthrough)
+        chosenPlanet = Math.floor(Math.random() * Math.floor(planets.length));
+        planets[chosenPlanet].setFocus();
     }
 
     var questionStarter = $('#question-starter-rotator .focus').text();
