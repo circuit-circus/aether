@@ -36,6 +36,12 @@ def drawLine():
 	printer.printImage(lineImg, True)
 	printer.feed(1)
 
+lineLength = 32
+def printWithLinebreak(givenText):
+	for i in range(0, givenText / lineLength):
+		
+	printer.printImage(lineImg, True)
+
 printer.wake()
 
 printer.setSize('S')
@@ -51,7 +57,7 @@ printer.printImage(aetherLogoImg, True)
 drawLine()
 
 printer.justify('C')
-printer.println("Your question was:")
+printer.println("You asked:")
 
 sleep(3)
 
