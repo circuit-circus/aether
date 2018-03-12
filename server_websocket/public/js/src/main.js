@@ -366,10 +366,7 @@ function changeToState3() {
  * Change to program state 4
  */
 function changeToState4() {
-    programState = 4;
-    $('main').attr('data-state', 4);
 
-    var planetId;
     for(var i = 0; i < NO_OF_PLANETS; i++) {
         if(planets[i].hasFocus) {
             if(!planets[i].isConnectionActive) {
@@ -379,35 +376,38 @@ function changeToState4() {
                 return;
             }
 
-            planetId = i;
+            var data = {
+                question : $('#asking-question-container').text(),
+                planetName : planetData[i].name,
+                planetId : i
+            };
+
+            fetch('/api/activateTransmission', {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(req_status)
+            .then(req_json)
+            .then(function(data) {
+                console.log('Request succeeded with JSON response', data);
+            }).catch(function(error) {
+                console.log('Request failed', error);
+            });
+
+            programState = 4;
+            $('main').attr('data-state', 4);
+
+            setTimeout(function() {
+                runState4();
+            }, 1000);
+
+            return;
         }
     }
-
-    var data = {
-        question : $('#asking-question-container').text(),
-        planetName : planetData[planetId].name,
-        planetId : planetId
-    };
-
-    fetch('/api/activateTransmission', {
-        method: 'post',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(req_status)
-    .then(req_json)
-    .then(function(data) {
-        console.log('Request succeeded with JSON response', data);
-    }).catch(function(error) {
-        console.log('Request failed', error);
-    });
-
-    setTimeout(function() {
-        runState4();
-    }, 1000);
 }
 
 /*
