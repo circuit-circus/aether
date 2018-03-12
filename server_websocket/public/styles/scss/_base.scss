@@ -37,10 +37,11 @@ main {
 
 .help-text-container {
   text-align: center;
-  //line-height: 2;
+  font-size: 20px;
 
   .small {
-    font-size: 12px;
+    font-size: 16px;
+    line-height: 1.8;
   }
 }
 
@@ -69,7 +70,7 @@ main[data-state='1'] {
 
 main[data-state='2'] {
   #planet-container canvas {
-    transform: scale(0.5) translateY(-250px);
+    transform: scale(0.6) translateY(-185px);
     opacity: 1;
   }
 
@@ -88,7 +89,7 @@ main[data-state='3'] {
 
 main[data-state='4'] {
   #planet-container canvas {
-    transform: scale(0.5) translateY(-250px);
+    transform: scale(0.6) translateY(-220px);
   }
 
   #transmission-container {

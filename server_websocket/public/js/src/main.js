@@ -24,49 +24,49 @@ var planets = [];
 var planetData = [
     {
         'name' : 'EM-6',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 78,
         'id' : 0,
         'type' : '3RING'
     },
     {
         'name' : 'MDAcom-86',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 102,
         'id' : 1,
         'type' : 'SPHERE'
     },
     {
         'name' : 'Grp/M',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 84,
         'id' : 2,
         'type' : '2RING'
     },
     {
         'name' : 'WAVE',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 90,
         'id' : 3,
         'type' : 'SPHERE'
     },
     {
         'name' : 'SERAHS-M1nd',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 103,
         'id' : 4,
         'type' : '3RING'
     },
     {
         'name' : 'JSPR92',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 90,
         'id' : 5,
         'type' : '2RING'
     },
     {
         'name' : 'NN-05',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 86,
         'id' : 6,
         'type' : 'SPHERE'
     },
     {
         'name' : 'VSOVS-io 8',
-        'diameter' : randomIntFromInterval(70, 110),
+        'diameter' : 100,
         'id' : 7,
         'type' : '3RING'
     }
@@ -121,10 +121,10 @@ function Planet(xPos, yPos, dia, name, id, type) {
     this.display = function() {
 
         noFill();
+        strokeWeight(4);
 
         // The user is focusing on the planet, but it is inactive
         if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
-            strokeWeight(2);
             stroke(100);
 
             if(this.type == 'SPHERE') {
@@ -136,15 +136,14 @@ function Planet(xPos, yPos, dia, name, id, type) {
                 ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
             } else if(this.type == '3RING') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 20, this.diameter - 20);
-                ellipse(this.x, this.y, this.diameter - 40, this.diameter - 40);
+                ellipse(this.x, this.y, this.diameter - 25, this.diameter - 25);
+                ellipse(this.x, this.y, this.diameter - 50, this.diameter - 50);
             } else {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
             }
 
         // The user is focusing on the planet and it's good
         } else if(this.hasFocus && (programState == 3 || programState == 4)) {
-            strokeWeight(3);
             stroke(255);
 
             this.theta += this.dtheta;
@@ -160,15 +159,14 @@ function Planet(xPos, yPos, dia, name, id, type) {
                 ellipse(this.x, this.y, r - 30, r - 30);
             } else if(this.type == '3RING') {
                 ellipse(this.x, this.y, r, r);
-                ellipse(this.x, this.y, r - 20, r - 20);
-                ellipse(this.x, this.y, r - 40, r - 40);
+                ellipse(this.x, this.y, r - 25, r - 25);
+                ellipse(this.x, this.y, r - 50, r - 50);
             } else {
                 ellipse(this.x, this.y, r, r);
             }
 
         // The planet is not active (and no focus on it)
         } else if (!this.isConnectionActive) {
-            strokeWeight(2);
             stroke(100);
 
             if(this.type == 'SPHERE') {
@@ -180,15 +178,14 @@ function Planet(xPos, yPos, dia, name, id, type) {
                 ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
             } else if(this.type == '3RING') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 20, this.diameter - 20);
-                ellipse(this.x, this.y, this.diameter - 40, this.diameter - 40);
+                ellipse(this.x, this.y, this.diameter - 25, this.diameter - 25);
+                ellipse(this.x, this.y, this.diameter - 50, this.diameter - 50);
             } else {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
             }
 
         // The planet active (and no focus on it)
         } else {
-            strokeWeight(2);
             stroke(255);
 
             if(this.type == 'SPHERE') {
@@ -200,8 +197,8 @@ function Planet(xPos, yPos, dia, name, id, type) {
                 ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
             } else if(this.type == '3RING') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 20, this.diameter - 20);
-                ellipse(this.x, this.y, this.diameter - 40, this.diameter - 40);
+                ellipse(this.x, this.y, this.diameter - 25, this.diameter - 25);
+                ellipse(this.x, this.y, this.diameter - 50, this.diameter - 50);
             } else {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
             }
