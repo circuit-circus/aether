@@ -73,8 +73,8 @@ var planetData = [
 ];
 
 var showPlanetNames = false;
-var theta = 0.219;
-var dtheta = 0.060;
+var theta = 0.5;
+var dtheta = 0.08;
 
 // p5 SETUP
 function setup() {
@@ -84,6 +84,7 @@ function setup() {
     fill(0);
     stroke(255);
     textFont("Noto Mono");
+    textSize(14);
 
     for(var i = 0; i < NO_OF_PLANETS; i++) {
         var pos = i * 125 + ((125-planetData[i].diameter) / 2 + planetData[i].diameter/2);
@@ -125,21 +126,25 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The user is focusing on the planet, but it is inactive
         if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
-            stroke(100);
+            stroke(150);
+
+            this.theta += this.dtheta;
+            var r = this.diameter + (this.diameter * (sin(this.theta / 3) + 1) / 10);
+            var rSphere = 20 + (20 * (sin(this.theta / 3) + 1) / 10);
 
             if(this.type == 'SPHERE') {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter, 20);
-                ellipse(this.x, this.y, 20, this.diameter);
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r, rSphere);
+                ellipse(this.x, this.y, rSphere, r);
             } else if(this.type == '2RING') {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r - 30, r - 30);
             } else if(this.type == '3RING') {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 25, this.diameter - 25);
-                ellipse(this.x, this.y, this.diameter - 50, this.diameter - 50);
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r - 25, r - 25);
+                ellipse(this.x, this.y, r - 50, r - 50);
             } else {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, r, r);
             }
 
         // The user is focusing on the planet and it's good
@@ -167,7 +172,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The planet is not active (and no focus on it)
         } else if (!this.isConnectionActive) {
-            stroke(100);
+            stroke(150);
 
             if(this.type == 'SPHERE') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
@@ -210,7 +215,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
             noStroke();
 
             if(!this.isConnectionActive) {
-                fill(100);
+                fill(150);
                 text('Unavailable', this.x, 325);
             }
 
@@ -355,7 +360,7 @@ function changeToState3() {
     }
 
     var questionStarter = $('#question-starter-rotator .focus').text();
-    $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
+    $('#asking-question-container span').text(questionStarter + ' ' + questionText + '?');
 
     programState = 3;
     $('main').attr('data-state', 3);
@@ -377,7 +382,7 @@ function changeToState4() {
             }
 
             var data = {
-                question : $('#asking-question-container').text(),
+                question : $('#asking-question-container span').text(),
                 planetName : planetData[i].name,
                 planetId : i
             };
@@ -503,41 +508,86 @@ function resetProgram() {
  */
 function runTerminalGUI() {
 
+    setInterval(function() {
+        $('#terminal-container').animate({
+            scrollTop: $('#terminal-container').get(0).scrollHeight
+        }, 200);
+    },200);
+
     if(programState != 4) return;
 
     var terminalStrings = [
         {
-            strings: ['', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading', 'Loading.', 'Loading..', 'Loading...', 'Loading complete'],
+            strings: ['', 'Initiating communication ports', 'Initiating communication ports.', 'Initiating communication ports..', 'Initiating communication ports...', 'Initiating communication ports', 'Initiating communication ports.', 'Initiating communication ports..', 'Communication ports online'],
             smartBackspace: true,
-            typeSpeed: 200
+            typeSpeed: 10
         },
         {
-            strings: ['', 'Initializing transmission'],
-            smartBackspace: false,
-            typeSpeed: 40
-        },
-        {
-            strings: ['', 'npm install^1000\n `installing components...` ^1000\n `Fetching from source...`'],
-            smartBackspace: false,
-            typeSpeed: 40
-        },
-        {
-            strings: ['', 'Transmission COMPLETE'],
-            smartBackspace: false,
-            typeSpeed: 40
-        },
-        {
-            strings: ['', '.', '..', '...'],
+            strings: ['', 'Calibrating antennas', 'Calibrating antennas: SUCCESS!'],
             smartBackspace: true,
-            typeSpeed: 40
+            typeSpeed: 20
+        },
+        {
+            strings: ['', 'Establishing Visual Basic GUI Interface for tracking IP addresses\n `Establishing Connection… Success!` ^500\n `Identifying remote operation system… Unix system detected`^1000\n '],
+            smartBackspace: false,
+            typeSpeed: 20
+        },
+        {
+            strings: ['', 'Preparing satellites...\n `Mapping satellite communication chain <1 out of 5>` ^600\n `Mapping satellite communication chain <2 out of 5>` ^1000\n `Mapping satellite communication chain <3 out of 5>` ^300\n `Mapping satellite communication chain <4 out of 5>` ^200\n `Mapping satellite communication chain <5 out of 5>` ^1000\n'],
+            smartBackspace: false,
+            typeSpeed: 10
+        },
+        {
+            strings: ['', 'Filtering deep space noise', 'Filtering deep space noise: SUCCESS!'],
+            smartBackspace: true,
+            typeSpeed: 5
+        },
+        {
+            strings: ['', '`Quantum system initialised` ^600\n `Signal strength: ' + randomIntFromInterval(70, 98) + '%` ^600\n `Current speed: 1.' + randomIntFromInterval(1, 8) + 'TB/s` ^600\n `Translation error margin: ' + randomIntFromInterval(10, 35) + '%`'],
+            smartBackspace: false,
+            typeSpeed: 20
+        },
+        {
+            strings: ['', 'TRANSMITTING: 3%', 'TRANSMITTING: 16%', 'TRANSMITTING: 47%', 'TRANSMITTING: 56%', 'TRANSMITTING: 81%', 'TRANSMITTING: COMPLETE'],
+            smartBackspace: true,
+            typeSpeed: 5,
+            attr: 'test'
+        },
+        {
+            strings: ['', 'Awaiting response...'],
+            smartBackspace: false,
+            typeSpeed: 20
+        },
+        {
+            strings: ['', 'Extraterrestrial communication intercepted!'],
+            smartBackspace: false,
+            typeSpeed: 20
+        },
+        {
+            strings: ['', '01100011 01101111 01100100 01100101 01100100 00100000 01100001 01101110 01100100 00100000 01100011 01110010 01100001 01100110 01110100 01100101 01100100 00100000 01100010 01111001 00100000 01100011 01101001 01110010 01100011 01110101 01101001 01110100 00100000 01100011 01101001 01110010 01110101 01100011 01110011'],
+            smartBackspace: false,
+            typeSpeed: 1
+        },
+        {
+            strings: ['', 'PRINTING TRANSLATION. PLEASE ACCEPT ANSWER.'],
+            smartBackspace: false,
+            typeSpeed: 20
+        },
+        {
+            strings: ['', 'System rebooting in: 5', 'System rebooting in: 4', 'System rebooting in: 3', 'System rebooting in: 2', 'System rebooting in: 1'],
+            smartBackspace: true,
+            typeSpeed: 20
         }
     ];
 
     var options = {
         strings: terminalStrings[terminalCounter].strings,
-        typeSpeed: 40,
+        typeSpeed: terminalStrings[terminalCounter].typeSpeed,
         smartBackspace : terminalStrings[terminalCounter].smartBackspace,
         showCursor: false,
+        preStringTyped: (number, self) => {
+            console.log(self);
+        },
         onComplete: (self) => {
             if(terminalCounter < terminalStrings.length - 1) {
                 var clone = $('.terminal-new-content').clone().removeClass('terminal-new-content').addClass('terminal-content-line');
@@ -550,7 +600,7 @@ function runTerminalGUI() {
             else {
                 setTimeout(function() {
                     resetProgram();
-                }, 3000);
+                }, 1000);
             }
         }
     }

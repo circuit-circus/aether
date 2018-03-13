@@ -9,8 +9,10 @@
     border: 2px solid #fff;
     padding: 10px;
     margin: 0 auto;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.5;
+    overflow-y: scroll;
+    overflow-x: hidden;
 
     #terminal-content {
 
