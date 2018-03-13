@@ -26,49 +26,57 @@ var planetData = [
         'name' : 'EM-6',
         'diameter' : 78,
         'id' : 0,
-        'type' : '3RING'
+        'type' : '3RING',
+        'hue' : 160
     },
     {
         'name' : 'MDAcom-86',
         'diameter' : 102,
         'id' : 1,
-        'type' : 'SPHERE'
+        'type' : 'SPHERE',
+        'hue' : 224
     },
     {
         'name' : 'Grp/M',
         'diameter' : 84,
         'id' : 2,
-        'type' : '2RING'
+        'type' : '2RING',
+        'hue' : 160
     },
     {
         'name' : 'WAVE',
         'diameter' : 90,
         'id' : 3,
-        'type' : 'SPHERE'
+        'type' : 'SPHERE',
+        'hue' : 32
     },
     {
         'name' : 'SERAHS-M1nd',
         'diameter' : 103,
         'id' : 4,
-        'type' : '3RING'
+        'type' : '3RING',
+        'hue' : 192
     },
     {
         'name' : 'JSPR92',
         'diameter' : 90,
         'id' : 5,
-        'type' : '2RING'
+        'type' : '2RING',
+        'hue' : 96
     },
     {
         'name' : 'NN-05',
         'diameter' : 86,
         'id' : 6,
-        'type' : 'SPHERE'
+        'type' : 'SPHERE',
+        'hue' : 64
     },
     {
         'name' : 'VSOVS-io 8',
         'diameter' : 100,
         'id' : 7,
-        'type' : '3RING'
+        'type' : '3RING',
+        'hue' : 0
     }
 ];
 
@@ -81,13 +89,14 @@ function setup() {
     var myCanvas = createCanvas(1000, 400);
     myCanvas.parent('planet-container');
 
+    colorMode(HSB, 255);
     fill(0);
     stroke(255);
     textFont("Noto Mono");
 
     for(var i = 0; i < NO_OF_PLANETS; i++) {
         var pos = i * 125 + ((125-planetData[i].diameter) / 2 + planetData[i].diameter/2);
-        planets[i] = new Planet(pos, 200, planetData[i].diameter, planetData[i].name, planetData[i].id, planetData[i].type);
+        planets[i] = new Planet(pos, 200, planetData[i].diameter, planetData[i].name, planetData[i].id, planetData[i].type, planetData[i].hue);
     }
 
     updateConnectedPlanets();
@@ -103,13 +112,14 @@ function draw() {
 }
 
 // Planet class
-function Planet(xPos, yPos, dia, name, id, type) {
+function Planet(xPos, yPos, dia, name, id, type, hue) {
     this.x = xPos;
     this.y = yPos;
     this.diameter = dia;
     this.name = name;
     this.id = id;
     this.type = type;
+    this.hue = hue;
     this.theta = theta;
     this.dtheta = dtheta;
 
@@ -122,10 +132,11 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         noFill();
         strokeWeight(4);
+        stroke(color(hue, 255, 255));
 
         // The user is focusing on the planet, but it is inactive
         if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
-            stroke(100);
+        stroke(color(hue, 100, 255));
 
             if(this.type == 'SPHERE') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
@@ -144,7 +155,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The user is focusing on the planet and it's good
         } else if(this.hasFocus && (programState == 3 || programState == 4)) {
-            stroke(255);
+            stroke(color(hue, 255, 255));
 
             this.theta += this.dtheta;
             var r = this.diameter + (this.diameter * (sin(this.theta) + 1) / 10);
@@ -167,7 +178,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The planet is not active (and no focus on it)
         } else if (!this.isConnectionActive) {
-            stroke(100);
+            stroke(color(hue, 100, 255));
 
             if(this.type == 'SPHERE') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
@@ -186,7 +197,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The planet active (and no focus on it)
         } else {
-            stroke(255);
+            stroke(color(hue, 255, 255));
 
             if(this.type == 'SPHERE') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
@@ -206,7 +217,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         if(showPlanetNames) {
             textAlign(CENTER);
-            fill(255);
+            fill(0);
             noStroke();
 
             if(!this.isConnectionActive) {
