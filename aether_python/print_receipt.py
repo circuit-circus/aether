@@ -44,8 +44,8 @@ def printWithLinebreak(string):
 				# Go back and find last space and insert with line break
 				for j in range(0, lineLength):
 					if string[i-j] == ' ':
-						print i
-						string = string[:i-j] + '\n' + string[i-j:]
+						string = string[:i-j] + '\n' + string[(i-j)+1:]
+						break;
 	printer.println(string)
 		
 printer.printImage(lineImg, True)
