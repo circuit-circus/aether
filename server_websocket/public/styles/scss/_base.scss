@@ -39,8 +39,14 @@ main {
   text-align: center;
   font-size: 20px;
 
+  .help-text-main {
+    background-color: #fff;
+    color: #000;
+    padding: 5px 10px;
+  }
+
   .small {
-    font-size: 16px;
+    //font-size: 16px;
     line-height: 1.8;
   }
 }
