@@ -3,8 +3,10 @@
 
 byte ledState = 0;
 
-unsigned long beginLEDsMillis = 0;        // will store last time LED was updated
-const long durationLEDs = 5000;           // interval at which to blink (milliseconds)
+// Timers
+unsigned long activeDurationTimer = 0;
+const long activeDurationLength = 15000; // Should always be longer than processingDurationLength
+const long processingDurationLength = 5000; // Should always be shorter than activeDurationLength
 
 const int thisArduinoID = 5;
 const String thisArduinoIDStr = String(thisArduinoID);
@@ -12,11 +14,11 @@ const String thisArduinoIDStr = String(thisArduinoID);
 // ID, HUE, no of LEDs ring 1, no of LEDs ring 2, no of LEDs ring 3
 constexpr int planets[8][5] = {
   {0, 160, 90, 72, 54}, // 3 rings - m/six - blå
-  {1, 215, 90, 90, 90}, // sphere - Circuit Circus - lilla
+  {1, 215, 92, 90, 90}, // sphere - Circuit Circus - lilla
   {2, 250, 80, 60, 1}, // 2 rings - Mediacom - pink
-  {3, 15, 90, 90, 90}, // sphere - Wavemakers - orange
+  {3, 15, 92, 90, 90}, // sphere - Wavemakers - orange
   {4, 195, 90, 72, 54}, // 3 rings - Mindshare - lilla
-  {5, 130, 90, 90, 90}, // sphere - Vores egen - tyrkis
+  {5, 130, 92, 90, 90}, // sphere - Vores egen - tyrkis
   {6, 150, 80, 60, 1}, // 2 rings - GroupM - blå
   {7, 0, 150, 72, 54} // 3 rings - Uno - rød
 };
@@ -56,42 +58,34 @@ void setup() {
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onReceive(receiveEvent); // register event
   Serial.begin(9600);           // start serial for output
-
-  
-  //hueSpectrum(planets[thisArduinoID][1], 20);
-  //fromToSnake(0, 160);
-  //striped(0, 160);
-  /*
-  striped3xLonger(
-    CHSV(planets[thisArduinoID][1], 255, 255),
-    CHSV(planets[thisArduinoID][1], 100, 255)
-  );
-  */
   
   currentBlending = LINEARBLEND;
 }
 
+const long idleTimer = 20000;
 void loop() {
 
   unsigned long currentMillis = millis();
 
-  if (ledState == 2 && currentMillis - beginLEDsMillis >= durationLEDs) {
+  if (ledState == 2 && currentMillis - activeDurationTimer >= activeDurationLength) {
     ledState = 1;
   }
 
-  //ledState = 1;
+  // ledState = 2;
 
   if (ledState == 0) {
     Serial.println("State 0");
     noConnection();
-    
   } else if (ledState == 1) {
     Serial.println("State 1");
     idle();
- 
   } else if (ledState == 2) {
     Serial.println("State 2");
-    processing();
+    if(currentMillis - activeDurationTimer < processingDurationLength) { // Start with the processing animation
+      processing();
+    } else if(currentMillis - activeDurationTimer < activeDurationLength) { // then move on to the active one
+      active();
+    }
   }
 }
 
@@ -99,8 +93,8 @@ void noConnection() {
 
   currentBlending = LINEARBLEND;
   setPaletteStriped(
-    CHSV(planets[thisArduinoID][1], 255, 255),
-    CHSV(planets[thisArduinoID][1], 100, 255)
+    CHSV(planets[thisArduinoID][1], 180, 180),
+    CHSV(planets[thisArduinoID][1], 100, 180)
   );
 
   static uint8_t startIndex = 0;
@@ -112,18 +106,23 @@ void noConnection() {
   
 }
 
+const long snakeDuration = 5000;
 void idle() {
   currentBlending = LINEARBLEND;
 
-  setPaletteHueSpectrum(planets[thisArduinoID][1], 40); 
+  setPaletteHueSpectrum(planets[thisArduinoID][1], 30); 
 
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1;
   FillLEDsFromPaletteColors(startIndex, 3);
 
-  FastLED.show();
-  FastLED.delay(1000 / 100);
+  // Make snakes every 5 seconds
+  if(millis() % snakeDuration * 2 < snakeDuration) {
+    runSnakeAnimation(true);
+  }
 
+  FastLED.show();
+  FastLED.delay(1000 / 500);
 }
 
 void processing() {
@@ -138,7 +137,19 @@ void processing() {
   FillLEDsFromPaletteColors(startIndex, 16 );
 
   FastLED.show();
-  FastLED.delay(1000 / 100);
+  FastLED.delay(1000 / 5000);
+}
+
+void active() {
+  currentBlending = LINEARBLEND;
+  heartbeatPalette(planets[thisArduinoID][1], 5);
+
+  static uint8_t startIndex = 0;
+  startIndex = startIndex + 1;
+  FillLEDsFromPaletteColors(startIndex, 16);
+
+  FastLED.show();
+  FastLED.delay(1000 / 5000);
 }
 
 // pixelsPerColor16. If you set it to 16, each color in the palette will fill one pixel. Set it to 8 and it's to LEDs per color, etc.
@@ -159,14 +170,12 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex, uint8_t pixelsPerColor16) {
     stripThree[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
     colorIndex += pixelsPerColor16;
   }
-  
 }
 
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany) {
-
   int x = Wire.read();    // receive byte as an integer
 
   if (x == 0) { // No connection
@@ -175,30 +184,59 @@ void receiveEvent(int howMany) {
     ledState = 1;
   } else if (x == 2) { // Activated
     ledState = 2;
-    beginLEDsMillis = millis();
+    activeDurationTimer = millis();
   }
 }
 
 
 // Takes a hue and makes a gradient from that, with variation to both sides
-CHSVPalette16 setPaletteHueSpectrum(byte hue, byte variation) {
+CHSVPalette16 setPaletteHueSpectrum(byte hue, byte satVariation) {
+  byte baseSat = 255 - satVariation;
+  byte baseHueVariation = 10;
   currentPalette = CHSVPalette16(
-    CHSV(hue - variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue + variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue - variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue + variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue - variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue + variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue - variation, 255, 255),
-    CHSV(hue, 255, 255),
-    CHSV(hue + variation, 255, 255),
-    CHSV(hue, 255, 255)
+    CHSV(hue + baseHueVariation, baseSat - satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat + satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat - satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat + satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat - satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat + satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat - satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255),
+    CHSV(hue + baseHueVariation, baseSat - satVariation, 255),
+    CHSV(hue - baseHueVariation, baseSat, 255)
+  );
+}
+
+int fadeVal = 0;
+bool shouldCountUp = false;
+CHSVPalette16 heartbeatPalette(byte hue, int fadeSpeed) {
+  byte baseHueVariation = 10;
+
+  if(shouldCountUp) {
+    fadeVal += fadeSpeed;
+  }
+  else {
+    fadeVal -= fadeSpeed * 3;
+  }
+
+  if(fadeVal > 255) {
+    fadeVal = 255;
+    shouldCountUp = false;
+  }
+  else if(fadeVal < 0) {
+    fadeVal = 0;
+    shouldCountUp = true;
+  }
+
+  currentPalette = CHSVPalette16(
+    CHSV(hue + baseHueVariation, fadeVal, 255),
+    CHSV(hue - baseHueVariation, fadeVal, 255)
   );
 }
 
@@ -253,3 +291,45 @@ CHSVPalette16 setPaletteStriped(CHSV color1, CHSV color2) {
   );
 }
 
+int indices[4] = {20, 45, 67, 0};
+int snakeDirections[4] = {+1, +1, +1, +1};
+long snakeTimer = 0;
+const long snakeTimerLength = 50;
+void determineNextIndex(CRGB leds, int num_leds, int index, bool shouldLoop) {
+  // Figure out what the index should be
+  if(indices[index] <= 0) {
+    if(snakeDirections[index] == -1) {
+      if(shouldLoop == true) {
+        indices[index] = num_leds;
+      }
+      else {
+        snakeDirections[index] = +1;
+        indices[index] = 0;
+      }
+    }
+  }
+  if(indices[index] >= num_leds) {
+    if(snakeDirections[index] == +1) {
+      if(shouldLoop == true) {
+        indices[index] = 0;
+      }
+      else {
+        snakeDirections[index] = -1;
+        indices[index] = num_leds;
+      }
+    }
+  }
+  indices[index] += snakeDirections[index];
+}
+
+void runSnakeAnimation(bool shouldLoop) {
+  determineNextIndex(stripOne, NUM_LEDS_ONE, 0, shouldLoop);
+  determineNextIndex(stripTwo, NUM_LEDS_TWO, 1, shouldLoop);
+  determineNextIndex(stripThree, NUM_LEDS_THREE, 2, shouldLoop);
+  determineNextIndex(stripCore, NUM_LEDS_CORE, 3, shouldLoop);
+
+  stripOne[indices[0]] = CHSV(planets[thisArduinoID][1], 100, 255);
+  stripTwo[indices[1]] = CHSV(planets[thisArduinoID][1], 100, 255);
+  stripThree[indices[2]] = CHSV(planets[thisArduinoID][1], 100, 255);
+  stripCore[indices[3]] = CHSV(planets[thisArduinoID][1], 100, 255);
+}
