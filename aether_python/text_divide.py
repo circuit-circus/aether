@@ -6,7 +6,8 @@ def printWithLinebreak(string, length):
 				# Go back and find last space and replace with line break
 				for j in range(0, length):
 					if string[i-j] == ' ':
-						string = string[:i-j] + '\n' + string[i-j:]
+						string = string[:i-j] + '\n' + string[(i-j)+1:]
+						break;
 	print string
 
 printWithLinebreak("abcdef ghijklmnopqrst uvwxyzABCDEF GHIJKLMN OPQRSTUVWXYZabcd efghijkl mnopqrstuvwxy zABCDEFGHIJKL MNOPQRST UVWXYZ", lineLength)
