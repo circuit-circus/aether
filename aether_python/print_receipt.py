@@ -37,10 +37,18 @@ def drawLine():
 	printer.feed(1)
 
 lineLength = 32
-def printWithLinebreak(givenText):
-	for i in range(0, givenText / lineLength):
+def printWithLinebreak(string):
+	for i in xrange(0, len(string), lineLength):
+		if i != 0:
+			if string[i] != ' ':
+				# Go back and find last space and insert with line break
+				for j in range(0, lineLength):
+					if string[i-j] == ' ':
+						print i
+						string = string[:i-j] + '\n' + string[i-j:]
+	printer.println(string)
 		
-	printer.printImage(lineImg, True)
+printer.printImage(lineImg, True)
 
 printer.wake()
 
@@ -57,27 +65,27 @@ printer.printImage(aetherLogoImg, True)
 drawLine()
 
 printer.justify('C')
-printer.println("You asked:")
+printWithLinebreak("You asked:")
 
 sleep(3)
 
 printer.inverseOn()
-printer.println(" " + questionTxt + " ")
+printWithLinebreak(" " + questionTxt + " ")
 printer.inverseOff()
 
 sleep(3)
 
-printer.println(planetName + " answered:")
+printWithLinebreak(planetName + " answered:")
 
 drawLine()
 
 printer.justify('L')
-printer.println(questionAnswer)
+printWithLinebreak(questionAnswer)
 
 drawLine()
 
 printer.justify('C')
-printer.println("Designed and developed by:")
+printWithLinebreak("Designed and developed by:")
 
 printer.printImage(ccLogoImg, True)
 
