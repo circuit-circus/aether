@@ -23,49 +23,49 @@ var NO_OF_PLANETS = 8;
 var planets = [];
 var planetData = [
     {
-        'name' : 'EM-6',
+        'name' : 'EM-6', // m/six
         'diameter' : 78,
         'id' : 0,
         'type' : '3RING'
     },
     {
-        'name' : 'Circuitius-C',
+        'name' : 'Circuitius-C', // Circuit Ciruc
         'diameter' : 102,
         'id' : 1,
         'type' : 'SPHERE'
     },
     {
-        'name' : 'MDAcom-86',
+        'name' : 'MDAcom-86', // Mediacom
         'diameter' : 84,
         'id' : 2,
         'type' : '2RING'
     },
     {
-        'name' : 'WAVE',
+        'name' : 'WAVE', // Wavemakers
         'diameter' : 90,
         'id' : 3,
         'type' : 'SPHERE'
     },
     {
-        'name' : 'SERAHS-M1nd',
+        'name' : 'SERAHS-M1nd', // Mindshare
         'diameter' : 103,
         'id' : 4,
         'type' : '3RING'
     },
     {
-        'name' : 'JVN-CT100',
+        'name' : 'JVN-CT100', // Vores egen
         'diameter' : 90,
         'id' : 5,
-        'type' : '2RING'
-    },
-    {
-        'name' : 'Grp/M',
-        'diameter' : 86,
-        'id' : 6,
         'type' : 'SPHERE'
     },
     {
-        'name' : '1SAVR',
+        'name' : 'Grp/M', // Group M
+        'diameter' : 86,
+        'id' : 6,
+        'type' : '2RING'
+    },
+    {
+        'name' : '1SAVR', // Uno <3
         'diameter' : 100,
         'id' : 7,
         'type' : '3RING'
