@@ -148,9 +148,12 @@ function Planet(xPos, yPos, dia, name, id, type) {
             }
 
             fill(173, 31, 35);
-            noStroke();
-            text('Unavailable', this.x, 325);
-            noFill();
+            textSize(26);
+            strokeWeight(2);
+            text('x', this.x, 335);
+
+            textSize(14);
+            fill(255);
 
         // The user is focusing on the planet and it's good
         } else if(this.hasFocus && (programState == 3 || programState == 4)) {
