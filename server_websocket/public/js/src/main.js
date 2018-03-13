@@ -73,8 +73,8 @@ var planetData = [
 ];
 
 var showPlanetNames = false;
-var theta = 0.219;
-var dtheta = 0.060;
+var theta = 0.5;
+var dtheta = 0.08;
 
 // p5 SETUP
 function setup() {
@@ -84,6 +84,7 @@ function setup() {
     fill(0);
     stroke(255);
     textFont("Noto Mono");
+    textSize(14);
 
     for(var i = 0; i < NO_OF_PLANETS; i++) {
         var pos = i * 125 + ((125-planetData[i].diameter) / 2 + planetData[i].diameter/2);
@@ -125,21 +126,25 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The user is focusing on the planet, but it is inactive
         if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
-            stroke(100);
+            stroke(150);
+
+            this.theta += this.dtheta;
+            var r = this.diameter + (this.diameter * (sin(this.theta / 3) + 1) / 10);
+            var rSphere = 20 + (20 * (sin(this.theta / 3) + 1) / 10);
 
             if(this.type == 'SPHERE') {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter, 20);
-                ellipse(this.x, this.y, 20, this.diameter);
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r, rSphere);
+                ellipse(this.x, this.y, rSphere, r);
             } else if(this.type == '2RING') {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 30, this.diameter - 30);
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r - 30, r - 30);
             } else if(this.type == '3RING') {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
-                ellipse(this.x, this.y, this.diameter - 25, this.diameter - 25);
-                ellipse(this.x, this.y, this.diameter - 50, this.diameter - 50);
+                ellipse(this.x, this.y, r, r);
+                ellipse(this.x, this.y, r - 25, r - 25);
+                ellipse(this.x, this.y, r - 50, r - 50);
             } else {
-                ellipse(this.x, this.y, this.diameter, this.diameter);
+                ellipse(this.x, this.y, r, r);
             }
 
         // The user is focusing on the planet and it's good
@@ -167,7 +172,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The planet is not active (and no focus on it)
         } else if (!this.isConnectionActive) {
-            stroke(100);
+            stroke(150);
 
             if(this.type == 'SPHERE') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
@@ -210,7 +215,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
             noStroke();
 
             if(!this.isConnectionActive) {
-                fill(100);
+                fill(150);
                 text('Unavailable', this.x, 325);
             }
 
@@ -355,7 +360,7 @@ function changeToState3() {
     }
 
     var questionStarter = $('#question-starter-rotator .focus').text();
-    $('#asking-question-container').text(questionStarter + ' ' + questionText + '?');
+    $('#asking-question-container span').text(questionStarter + ' ' + questionText + '?');
 
     programState = 3;
     $('main').attr('data-state', 3);
@@ -377,7 +382,7 @@ function changeToState4() {
             }
 
             var data = {
-                question : $('#asking-question-container').text(),
+                question : $('#asking-question-container span').text(),
                 planetName : planetData[i].name,
                 planetId : i
             };
