@@ -1,7 +1,12 @@
 #asking-question-container {
     top: 50px;
     text-align: center;
-    font-size: 20px;
+
+    span {
+        background-color: #fff;
+        color: #000;
+        padding: 5px 10px;
+    }
 }
 
 #pick-planet-container {

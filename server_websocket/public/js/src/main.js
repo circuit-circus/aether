@@ -215,7 +215,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
             fill(255);
 
             if(!this.isConnectionActive) {
-                fill(173, 31, 35)
+                //fill(173, 31, 35)
             }
 
             text(this.name, this.x, 300);
@@ -403,6 +403,7 @@ function changeToState4() {
 
             programState = 4;
             $('main').attr('data-state', 4);
+            showPlanetNames = false;
 
             setTimeout(function() {
                 runState4();
