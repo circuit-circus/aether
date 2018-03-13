@@ -21,6 +21,10 @@ input, button {
   font-family: $font-stack;
 }
 
+::-webkit-scrollbar {
+    display: none;
+}
+
 main {
   position: relative;
 }

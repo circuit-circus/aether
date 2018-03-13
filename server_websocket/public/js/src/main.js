@@ -147,6 +147,11 @@ function Planet(xPos, yPos, dia, name, id, type) {
                 ellipse(this.x, this.y, r, r);
             }
 
+            fill(173, 31, 35);
+            noStroke();
+            text('Unavailable', this.x, 325);
+            noFill();
+
         // The user is focusing on the planet and it's good
         } else if(this.hasFocus && (programState == 3 || programState == 4)) {
             stroke(255);
@@ -213,10 +218,6 @@ function Planet(xPos, yPos, dia, name, id, type) {
             textAlign(CENTER);
             noStroke();
             fill(255);
-
-            if(!this.isConnectionActive) {
-                //fill(173, 31, 35)
-            }
 
             text(this.name, this.x, 300);
         }
