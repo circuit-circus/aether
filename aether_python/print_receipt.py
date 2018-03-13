@@ -10,6 +10,7 @@ if os.path.dirname(__file__) != '':
     os.chdir(os.path.dirname(__file__))
 currentDirectory = os.getcwd()
 
+# Get arguments from whatever is calling this script
 questionTxt = "What is behind this door?"
 if len(sys.argv) > 1:
 	questionTxt = sys.argv[1]
@@ -24,13 +25,14 @@ if len(sys.argv) > 3:
 
 receiptWidth = 384
 
-# Create bars programmatically
+# Setup for creating lines
 lineImg = Image.new("1", [receiptWidth, 3], "white") # Working 'background' image
 draw = ImageDraw.Draw(lineImg)
 draw.rectangle([0, 0, receiptWidth, 3], fill="black")
 
 printer = Adafruit_Thermal("/dev/serial0", 19200, timeout=5)
 
+# Method definitions
 def drawLine():
 	printer.feed(1)
 	printer.printImage(lineImg, True)
@@ -47,11 +49,9 @@ def printWithLinebreak(string):
 						string = string[:i-j] + '\n' + string[(i-j)+1:]
 						break;
 	printer.println(string)
-		
-printer.printImage(lineImg, True)
 
+# Setup
 printer.wake()
-
 printer.setSize('S')
 
 aetherLogoPath = currentDirectory + "/images/aether.png"
@@ -60,6 +60,9 @@ ccLogoPath = currentDirectory + "/images/cc-logo.png"
 aetherLogoImg = Image.open(aetherLogoPath)
 ccLogoImg = Image.open(ccLogoPath)
 
+# Let's start drawing!
+drawLine()
+
 printer.printImage(aetherLogoImg, True)
 
 drawLine()
@@ -67,12 +70,14 @@ drawLine()
 printer.justify('C')
 printWithLinebreak("You asked:")
 
+# Take a break to catch up with the data
 sleep(3)
 
 printer.inverseOn()
 printWithLinebreak(" " + questionTxt + " ")
 printer.inverseOff()
 
+# Take a break to catch up with the data
 sleep(3)
 
 printWithLinebreak(planetName + " answered:")
@@ -85,7 +90,7 @@ printWithLinebreak(questionAnswer)
 drawLine()
 
 printer.justify('C')
-printWithLinebreak("Designed and developed by:")
+printWithLinebreak("Crafted and coded by:")
 
 printer.printImage(ccLogoImg, True)
 
