@@ -29,13 +29,13 @@ var planetData = [
         'type' : '3RING'
     },
     {
-        'name' : 'MDAcom-86',
+        'name' : 'Circuitius-C',
         'diameter' : 102,
         'id' : 1,
         'type' : 'SPHERE'
     },
     {
-        'name' : 'Grp/M',
+        'name' : 'MDAcom-86',
         'diameter' : 84,
         'id' : 2,
         'type' : '2RING'
@@ -53,19 +53,19 @@ var planetData = [
         'type' : '3RING'
     },
     {
-        'name' : 'JSPR92',
+        'name' : 'JVN-CT100',
         'diameter' : 90,
         'id' : 5,
         'type' : '2RING'
     },
     {
-        'name' : 'NN-05',
+        'name' : 'Grp/M',
         'diameter' : 86,
         'id' : 6,
         'type' : 'SPHERE'
     },
     {
-        'name' : 'VSOVS-io 8',
+        'name' : '1SAVR',
         'diameter' : 100,
         'id' : 7,
         'type' : '3RING'
@@ -126,7 +126,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The user is focusing on the planet, but it is inactive
         if(this.hasFocus && !this.isConnectionActive && (programState == 3 || programState == 4)) {
-            stroke(150);
+            stroke(173, 31, 35);
 
             this.theta += this.dtheta;
             var r = this.diameter + (this.diameter * (sin(this.theta / 3) + 1) / 10);
@@ -146,6 +146,14 @@ function Planet(xPos, yPos, dia, name, id, type) {
             } else {
                 ellipse(this.x, this.y, r, r);
             }
+
+            fill(173, 31, 35);
+            textSize(26);
+            strokeWeight(2);
+            text('x', this.x, 335);
+
+            textSize(14);
+            fill(255);
 
         // The user is focusing on the planet and it's good
         } else if(this.hasFocus && (programState == 3 || programState == 4)) {
@@ -172,7 +180,7 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         // The planet is not active (and no focus on it)
         } else if (!this.isConnectionActive) {
-            stroke(150);
+            stroke(173, 31, 35);
 
             if(this.type == 'SPHERE') {
                 ellipse(this.x, this.y, this.diameter, this.diameter);
@@ -211,16 +219,10 @@ function Planet(xPos, yPos, dia, name, id, type) {
 
         if(showPlanetNames) {
             textAlign(CENTER);
-            fill(255);
             noStroke();
-
-            if(!this.isConnectionActive) {
-                fill(150);
-                text('Unavailable', this.x, 325);
-            }
+            fill(255);
 
             text(this.name, this.x, 300);
-
         }
     }
 
@@ -405,6 +407,7 @@ function changeToState4() {
 
             programState = 4;
             $('main').attr('data-state', 4);
+            showPlanetNames = false;
 
             setTimeout(function() {
                 runState4();
