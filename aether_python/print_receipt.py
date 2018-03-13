@@ -38,17 +38,20 @@ def drawLine():
 	printer.printImage(lineImg, True)
 	printer.feed(1)
 
-lineLength = 32
+# Source: https://stackoverflow.com/questions/21932281/recursively-create-a-new-line-break-after-nth-character-for-a-given-block-of-tex
+def wrap(txt, width):
+	tmp = ""
+	for i in txt.split():
+		if len(tmp) + len(i) < width:
+			tmp+=" "+i
+		else:
+			print tmp.strip()
+			tmp = i
+	return tmp
+
+lineLength = 31
 def printWithLinebreak(string):
-	for i in xrange(0, len(string), lineLength):
-		if i != 0:
-			if string[i] != ' ':
-				# Go back and find last space and insert with line break
-				for j in range(0, lineLength):
-					if string[i-j] == ' ':
-						string = string[:i-j] + '\n' + string[(i-j)+1:]
-						break;
-	printer.println(string)
+	println(wrap(string, lineLength))
 
 # Setup
 printer.wake()
@@ -74,7 +77,9 @@ printWithLinebreak("You asked:")
 sleep(3)
 
 printer.inverseOn()
+sleep(1)
 printWithLinebreak(" " + questionTxt + " ")
+sleep(1)
 printer.inverseOff()
 
 # Take a break to catch up with the data

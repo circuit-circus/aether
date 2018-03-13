@@ -1,13 +1,14 @@
-lineLength = 32
-def printWithLinebreak(string, length):
-	for i in xrange(0, len(string), length):
-		if i != 0:
-			if string[i] != ' ':
-				# Go back and find last space and replace with line break
-				for j in range(0, length):
-					if string[i-j] == ' ':
-						string = string[:i-j] + '\n' + string[(i-j)+1:]
-						break;
-	print string
+newStr = "Scientists think the high rate of galaxy collisions occurred when the solid rocket boosters separated, the ride got a lot of my time, and a storm had passed just hours before."
+lineLength = 31
 
-printWithLinebreak("abcdef ghijklmnopqrst uvwxyzABCDEF GHIJKLMN OPQRSTUVWXYZabcd efghijkl mnopqrstuvwxy zABCDEFGHIJKL MNOPQRST UVWXYZ", lineLength)
+def wrap(txt, width):
+	tmp = ""
+	for i in txt.split():
+		if len(tmp) + len(i) < width:
+			tmp+=" "+i
+		else:
+			print tmp.strip()
+			tmp = i
+	return tmp
+
+wrap(newStr, lineLength)
