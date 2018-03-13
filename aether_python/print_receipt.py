@@ -51,7 +51,7 @@ def wrap(txt, width):
 
 lineLength = 31
 def printWithLinebreak(string):
-	println(wrap(string, lineLength))
+	printer.println(wrap(string, lineLength))
 
 # Setup
 printer.wake()
