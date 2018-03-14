@@ -93,7 +93,9 @@ sleep(3)
 
 printWithLinebreak(planetName + " answered:")
 
-printWithLinebreak("Translation error margin: " + errorMargin + "%")
+sleep(2)
+
+printWithLinebreak("Translation error margin: " + str(errorMargin) + "%")
 
 drawLine()
 
