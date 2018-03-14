@@ -70,7 +70,7 @@ aetherLogoImg = Image.open(aetherLogoPath)
 ccLogoImg = Image.open(ccLogoPath)
 
 # Let's start drawing!
-sleep(30)
+sleep(25)
 drawLine()
 
 printer.printImage(aetherLogoImg, True)
@@ -82,8 +82,6 @@ printWithLinebreak("You asked:")
 
 # Take a break to catch up with the data
 sleep(3)
-
-sleep(3)
 printWithLinebreak(" " + questionTxt + " ")
 sleep(3)
 
@@ -92,7 +90,7 @@ printer.feed(1)
 # Take a break to catch up with the data
 sleep(3)
 
-printWithLinebreak("The inhabitants of " + planetName + " answered:")
+printWithLinebreak("The inhabitants of\n" + planetName + " answered:")
 
 printer.feed(1)
 
