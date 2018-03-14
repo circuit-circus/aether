@@ -6,6 +6,7 @@ var python = require('../services/python');
 var websocket_helpers = require('../services/websocket_helpers');
 var textGenService = require('../services/text_generation');
 textGenService.initGenerator();
+var analytics = require('../services/analytics');
 
 // Get currently connected ardunos
 router.get('/currentArduinoClients', function(req, res) {
@@ -56,6 +57,12 @@ router.post('/activateTransmission', function(req, res) {
     }
     res.send(response);
   });
+
+  let analyticsData = {
+    
+  }
+
+  analytics.saveData()
 
 });
 
