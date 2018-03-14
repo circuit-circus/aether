@@ -93,20 +93,24 @@ sleep(3)
 
 printWithLinebreak(planetName + " answered:")
 
-sleep(2)
+sleep(3)
 
 printWithLinebreak("Translation error margin: " + str(errorMargin) + "%")
 
 drawLine()
 
+sleep(3)
+
 printer.justify('L')
 printWithLinebreak(questionAnswer)
 
+sleep(2)
 drawLine()
 
 printer.justify('C')
 printWithLinebreak("Crafted and coded by:")
 
+printer.feed(1)
 printer.printImage(ccLogoImg, True)
 
 printer.feed(2)
