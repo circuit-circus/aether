@@ -25,7 +25,7 @@ if len(sys.argv) > 3:
 
 errorMargin = 87
 if len(sys.argv) > 4:
-	questionAnswer = sys.argv[4]
+	errorMargin = sys.argv[4]
 
 receiptWidth = 384
 
@@ -70,6 +70,7 @@ aetherLogoImg = Image.open(aetherLogoPath)
 ccLogoImg = Image.open(ccLogoPath)
 
 # Let's start drawing!
+sleep(25)
 drawLine()
 
 printer.printImage(aetherLogoImg, True)
@@ -81,33 +82,41 @@ printWithLinebreak("You asked:")
 
 # Take a break to catch up with the data
 sleep(3)
-
-printer.inverseOn()
-sleep(1)
 printWithLinebreak(" " + questionTxt + " ")
-sleep(1)
-printer.inverseOff()
+sleep(3)
+
+printer.feed(1)
 
 # Take a break to catch up with the data
 sleep(3)
 
-printWithLinebreak(planetName + " answered:")
+printWithLinebreak("The inhabitants of\n" + planetName + " answered:")
 
-printWithLinebreak("Translation error margin: " + errorMargin + "%")
+printer.feed(1)
 
-drawLine()
+sleep(3)
 
 printer.justify('L')
 printWithLinebreak(questionAnswer)
+
+sleep(3)
+
+printer.feed(1)
+
+printer.justify('C')
+printWithLinebreak("Translation error margin: " + str(errorMargin) + "%")
+
+sleep(2)
 
 drawLine()
 
 printer.justify('C')
 printWithLinebreak("Crafted and coded by:")
 
+printer.feed(1)
 printer.printImage(ccLogoImg, True)
 
-printer.feed(2)
+printer.feed(3)
 
 # When done
 printer.sleep()
