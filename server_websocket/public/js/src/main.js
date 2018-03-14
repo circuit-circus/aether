@@ -13,6 +13,7 @@ var RESET_TIME = 60000;
 var programInactive = false;
 
 var terminalCounter = 0;
+var translationErrorMargin;
 
 var chosenQuestionStarter = 0;
 var chosenPlanet;
@@ -302,11 +303,14 @@ $(document).ready(function() {
 
         if(programState == 1) { // Title screen
             e.preventDefault();
-            changeToState2(e);
+            changeToState2();
         } else if (programState == 2) { // Input question
             runState2(e);
         } else if (programState == 3) { // Select planet
+            e.preventDefault();
             runState3(e);
+        } else if (programState == 4) {
+            e.preventDefault();
         }
     });
 });
@@ -383,10 +387,13 @@ function changeToState4() {
                 return;
             }
 
+            translationErrorMargin = randomIntFromInterval(10, 35);
+
             var data = {
                 question : $('#asking-question-container span').text(),
                 planetName : planetData[i].name,
-                planetId : i
+                planetId : i,
+                translationErrorMargin : translationErrorMargin
             };
 
             fetch('/api/activateTransmission', {
@@ -523,37 +530,37 @@ function runTerminalGUI() {
         {
             strings: ['', 'Initiating communication ports', 'Initiating communication ports.', 'Initiating communication ports..', 'Initiating communication ports...', 'Initiating communication ports', 'Initiating communication ports.', 'Initiating communication ports..', 'Communication ports online'],
             smartBackspace: true,
-            typeSpeed: 10
+            typeSpeed: 0
         },
         {
             strings: ['', 'Calibrating antennas', 'Calibrating antennas: SUCCESS!'],
             smartBackspace: true,
-            typeSpeed: 20
+            typeSpeed: 1
         },
         {
-            strings: ['', 'Establishing Visual Basic GUI Interface for tracking IP addresses\n `Establishing Connection… Success!` ^500\n `Identifying remote operation system… Unix system detected`^1000\n '],
+            strings: ['', 'Establishing Visual Basic GUI Interface for tracking IP addresses\n `Establishing Connection… Success!` ^200\n `Identifying remote operation system… Unix system detected`^100\n '],
             smartBackspace: false,
-            typeSpeed: 20
+            typeSpeed: 0
         },
         {
-            strings: ['', 'Preparing satellites...\n `Mapping satellite communication chain <1 out of 5>` ^600\n `Mapping satellite communication chain <2 out of 5>` ^1000\n `Mapping satellite communication chain <3 out of 5>` ^300\n `Mapping satellite communication chain <4 out of 5>` ^200\n `Mapping satellite communication chain <5 out of 5>` ^1000\n'],
+            strings: ['', 'Preparing satellites...\n `Mapping satellite communication chain <1 out of 5>` ^700\n `Mapping satellite communication chain <2 out of 5>` ^500\n `Mapping satellite communication chain <3 out of 5>` ^300\n `Mapping satellite communication chain <4 out of 5>` ^200\n `Mapping satellite communication chain <5 out of 5>` ^500\n'],
             smartBackspace: false,
-            typeSpeed: 10
+            typeSpeed: 0
         },
         {
             strings: ['', 'Filtering deep space noise', 'Filtering deep space noise: SUCCESS!'],
             smartBackspace: true,
-            typeSpeed: 5
+            typeSpeed: 2
         },
         {
-            strings: ['', '`Quantum system initialised` ^600\n `Signal strength: ' + randomIntFromInterval(70, 98) + '%` ^600\n `Current speed: 1.' + randomIntFromInterval(1, 8) + 'TB/s` ^600\n `Translation error margin: ' + randomIntFromInterval(10, 35) + '%`'],
+            strings: ['', '`Quantum system initialised` ^600\n `Signal strength: ' + randomIntFromInterval(70, 98) + '%` ^600\n `Current speed: 1.' + randomIntFromInterval(1, 8) + 'TB/s` ^600\n `Translation error margin: ' + translationErrorMargin + '%`'],
             smartBackspace: false,
-            typeSpeed: 20
+            typeSpeed: 0
         },
         {
             strings: ['', 'TRANSMITTING: 3%', 'TRANSMITTING: 16%', 'TRANSMITTING: 47%', 'TRANSMITTING: 56%', 'TRANSMITTING: 81%', 'TRANSMITTING: COMPLETE'],
             smartBackspace: true,
-            typeSpeed: 5,
+            typeSpeed: 0,
             attr: 'test'
         },
         {
@@ -564,17 +571,22 @@ function runTerminalGUI() {
         {
             strings: ['', 'Extraterrestrial communication intercepted!'],
             smartBackspace: false,
-            typeSpeed: 20
+            typeSpeed: 0
         },
         {
             strings: ['', '01100011 01101111 01100100 01100101 01100100 00100000 01100001 01101110 01100100 00100000 01100011 01110010 01100001 01100110 01110100 01100101 01100100 00100000 01100010 01111001 00100000 01100011 01101001 01110010 01100011 01110101 01101001 01110100 00100000 01100011 01101001 01110010 01110101 01100011 01110011'],
             smartBackspace: false,
-            typeSpeed: 1
+            typeSpeed: 0
         },
         {
-            strings: ['', 'PRINTING TRANSLATION. PLEASE ACCEPT ANSWER.'],
-            smartBackspace: false,
+            strings: ['', 'PLEASE ACCEPT ANSWER', 'PLEASE ACCEPT ANSWER.', 'PLEASE ACCEPT ANSWER..', 'PLEASE ACCEPT ANSWER...', 'PLEASE ACCEPT ANSWER', 'PLEASE ACCEPT ANSWER.', 'PLEASE ACCEPT ANSWER..', 'PLEASE ACCEPT ANSWER...'],
+            smartBackspace: true,
             typeSpeed: 20
+        },
+        {
+            strings: ['', 'Thank you for using aether. Have a NextM day!'],
+            smartBackspace: false,
+            typeSpeed: 5
         },
         {
             strings: ['', 'System rebooting in: 5', 'System rebooting in: 4', 'System rebooting in: 3', 'System rebooting in: 2', 'System rebooting in: 1'],
@@ -589,7 +601,6 @@ function runTerminalGUI() {
         smartBackspace : terminalStrings[terminalCounter].smartBackspace,
         showCursor: false,
         preStringTyped: (number, self) => {
-            console.log(self);
         },
         onComplete: (self) => {
             if(terminalCounter < terminalStrings.length - 1) {
