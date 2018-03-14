@@ -6,7 +6,13 @@
     4 = Transmit and recieve
 */
 var programState = 1;
-var errorAudio = new Audio('sound/error.mp3');
+
+// Sounds
+var backgroundSound = new Audio('sounds/harddrive.mp3');
+backgroundSound.loop = true;
+var faxSound = new Audio('sounds/fax.mp3')
+var alienNoise1 = new Audio('sounds/alienNoise1.mp3');
+var errorAudio = new Audio('sounds/error.mp3');
 
 
 var RESET_TIME = 60000;
@@ -289,6 +295,11 @@ $(document).ready(function() {
     // Check for program inactivity every X seconds
     setInterval(resetProgramTimer, RESET_TIME);
 
+    errorAudio.load();
+    backgroundSound.load();
+    faxSound.load();
+    alienNoise1.load();
+    backgroundSound.play();
 
     // Check for key inputs
     $('body').on('keydown', function(e) {
@@ -478,6 +489,15 @@ function runState3(e) {
  */
 function runState4() {
     programInactive = false;
+
+    // Prepare noises for transmission
+    setTimeout(function() {
+        faxSound.play();
+    }, 1000);
+    setTimeout(function() {
+        alienNoise1.play();
+    }, 24000);
+
     runTerminalGUI();
 }
 
