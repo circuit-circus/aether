@@ -5,22 +5,22 @@ byte ledState = 0;
 
 // Timers
 unsigned long activeDurationTimer = 0;
-const long activeDurationLength = 15000; // Should always be longer than processingDurationLength
-const long processingDurationLength = 5000; // Should always be shorter than activeDurationLength
+const long activeDurationLength = 60000; // Should always be longer than processingDurationLength
+const long processingDurationLength = 15000; // Should always be shorter than activeDurationLength
 
-const int thisArduinoID = 5;
+const int thisArduinoID = 6;
 const String thisArduinoIDStr = String(thisArduinoID);
 
 // ID, HUE, no of LEDs ring 1, no of LEDs ring 2, no of LEDs ring 3
 constexpr int planets[8][5] = {
   {0, 160, 90, 72, 54}, // 3 rings - m/six - blå
   {1, 215, 92, 90, 90}, // sphere - Circuit Circus - lilla
-  {2, 250, 80, 60, 1}, // 2 rings - Mediacom - pink
+  {2, 250, 87, 63, 1}, // 2 rings - Mediacom - pink
   {3, 15, 92, 90, 90}, // sphere - Wavemakers - orange
   {4, 195, 90, 72, 54}, // 3 rings - Mindshare - lilla
-  {5, 130, 92, 90, 90}, // sphere - Vores egen - tyrkis
-  {6, 150, 80, 60, 1}, // 2 rings - GroupM - blå
-  {7, 0, 150, 72, 54} // 3 rings - Uno - rød
+  {5, 130, 92, 92, 92}, // sphere - Vores egen - tyrkis
+  {6, 150, 87, 63, 1}, // 2 rings - GroupM - blå
+  {7, 0, 150, 74, 54} // 3 rings - Uno - rød
 };
 
 
@@ -168,6 +168,11 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex, uint8_t pixelsPerColor16) {
 
   for ( int i = 0; i < NUM_LEDS_THREE; i++) {
     stripThree[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
+    colorIndex += pixelsPerColor16;
+  }
+
+  for ( int i = 0; i < NUM_LEDS_CORE; i++) {
+    stripCore[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
     colorIndex += pixelsPerColor16;
   }
 }
