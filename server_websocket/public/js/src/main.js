@@ -496,7 +496,7 @@ function runState4() {
     }, 1000);
     setTimeout(function() {
         alienNoise1.play();
-    }, 25000);
+    }, 24000);
 
     runTerminalGUI();
 }
