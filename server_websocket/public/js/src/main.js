@@ -533,6 +533,11 @@ function runTerminalGUI() {
             typeSpeed: 0
         },
         {
+            strings: ['', 'PLEASE GAZE UPON PLANET TO MANUALLY VERIFY'],
+            smartBackspace: false,
+            typeSpeed: 10
+        },
+        {
             strings: ['', 'Calibrating antennas', 'Calibrating antennas: SUCCESS!'],
             smartBackspace: true,
             typeSpeed: 1
