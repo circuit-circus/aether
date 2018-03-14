@@ -83,34 +83,33 @@ printWithLinebreak("You asked:")
 # Take a break to catch up with the data
 sleep(3)
 
-printer.inverseOn()
+# printer.inverseOn()
 sleep(3)
 printWithLinebreak(" " + questionTxt + " ")
 sleep(3)
-printer.inverseOff()
+# printer.inverseOff()
 
 # Take a break to catch up with the data
-sleep(3)
-
-printer.justify('L')
-printWithLinebreak(questionAnswer)
-
-sleep(2)
-drawLine()
-
-printer.justify('C')
-
 sleep(3)
 
 printWithLinebreak(planetName + " answered:")
 
 sleep(3)
 
+printer.justify('L')
+printWithLinebreak(questionAnswer)
+
+sleep(3)
+
+printer.feed(1)
+
 printWithLinebreak("Translation error margin: " + str(errorMargin) + "%")
+
+sleep(2)
 
 drawLine()
 
-sleep(3)
+printer.justify('C')
 printWithLinebreak("Crafted and coded by:")
 
 printer.feed(1)
