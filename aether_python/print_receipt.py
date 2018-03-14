@@ -25,7 +25,7 @@ if len(sys.argv) > 3:
 
 errorMargin = 87
 if len(sys.argv) > 4:
-	questionAnswer = sys.argv[4]
+	errorMargin = sys.argv[4]
 
 receiptWidth = 384
 
