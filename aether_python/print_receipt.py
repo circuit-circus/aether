@@ -23,6 +23,10 @@ questionAnswer = "What door?"
 if len(sys.argv) > 3:
 	questionAnswer = sys.argv[3]
 
+errorMargin = 87
+if len(sys.argv) > 4:
+	questionAnswer = sys.argv[4]
+
 receiptWidth = 384
 
 # Setup for creating lines
@@ -88,6 +92,8 @@ printer.inverseOff()
 sleep(3)
 
 printWithLinebreak(planetName + " answered:")
+
+printWithLinebreak("Translation error margin: " + errorMargin + "%")
 
 drawLine()
 
