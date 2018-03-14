@@ -70,6 +70,7 @@ aetherLogoImg = Image.open(aetherLogoPath)
 ccLogoImg = Image.open(ccLogoPath)
 
 # Let's start drawing!
+sleep(5)
 drawLine()
 
 printer.printImage(aetherLogoImg, True)
@@ -83,19 +84,12 @@ printWithLinebreak("You asked:")
 sleep(3)
 
 printer.inverseOn()
-sleep(1)
+sleep(3)
 printWithLinebreak(" " + questionTxt + " ")
-sleep(1)
+sleep(3)
 printer.inverseOff()
 
 # Take a break to catch up with the data
-sleep(3)
-
-printWithLinebreak(planetName + " answered:")
-
-sleep(3)
-
-printWithLinebreak("Translation error margin: " + str(errorMargin) + "%")
 
 drawLine()
 
