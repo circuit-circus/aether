@@ -23,6 +23,10 @@ questionAnswer = "What door?"
 if len(sys.argv) > 3:
 	questionAnswer = sys.argv[3]
 
+errorMargin = 87
+if len(sys.argv) > 4:
+	questionAnswer = sys.argv[4]
+
 receiptWidth = 384
 
 # Setup for creating lines
@@ -51,7 +55,9 @@ def wrap(txt, width):
 
 lineLength = 31
 def printWithLinebreak(string):
-	printer.println(wrap(string, lineLength))
+	#newStr = wrap(string, lineLength)
+	#sleep(1)
+	printer.println(string)
 
 # Setup
 printer.wake()
@@ -86,6 +92,8 @@ printer.inverseOff()
 sleep(3)
 
 printWithLinebreak(planetName + " answered:")
+
+printWithLinebreak("Translation error margin: " + errorMargin + "%")
 
 drawLine()
 

@@ -24,13 +24,14 @@ router.post('/activateTransmission', function(req, res) {
   var question = req.body.question;
   var planetName = req.body.planetName;
   var planetId = req.body.planetId;
+  var errorMargin = req.body.translationErrorMargin;
 
   // Activate Arduino planet
   websocket_helpers.broadcast(planetId); // Broadcast data to all connected devices
 
   // Get an answer
   textGenService.getAnswer(question, planetName).then(function(fulfilled) {
-    python.printReceipt(question, planetName, fulfilled).then(function(printMessage) {
+    python.printReceipt(question, planetName, fulfilled, errorMargin).then(function(printMessage) {
       console.log(printMessage);
       let response = {
         status : 200,

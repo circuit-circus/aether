@@ -57,7 +57,7 @@ function getAnswer(questionTxt, planetName) {
         sentence += ' ' + textGenerator.makeSentence();
       }
     	console.log('Generated this answer: ' + sentence);
-      if(questionTxt === 'What is') {
+      if(!questionTxt.includes('What is')) {
         sentence += " " + getSumUp();
       }
     	resolve(sentence);
