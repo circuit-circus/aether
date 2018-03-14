@@ -14,8 +14,8 @@ var faxSound = new Audio('sounds/fax.mp3')
 var alienNoise1 = new Audio('sounds/alienNoise1.mp3');
 var errorAudio = new Audio('sounds/error.mp3');
 
-
-var RESET_TIME = 60000;
+var UPDATE_PLANETS_TIME = 15000;
+var RESET_TIME = 180000;
 var programInactive = false;
 
 var terminalCounter = 0;
@@ -294,6 +294,8 @@ $(document).ready(function() {
 
     // Check for program inactivity every X seconds
     setInterval(resetProgramTimer, RESET_TIME);
+    // Update connected planets every X seconds
+    setInterval(updateConnectedPlanets, UPDATE_PLANETS_TIME);
 
     errorAudio.load();
     backgroundSound.load();
@@ -662,16 +664,24 @@ function updateConnectedPlanets() {
 
         var props = ['id'];
         var inactivePlanets = planets.filter(function(o1) {
-            // filter out (!) items in result2
             return !connectedlanetsFromAPI.some(function(o2) {
-                return o1.id === o2.id; // assumes unique id
+                return o1.id === o2.id;
             });
         });
 
-        inactivePlanets.forEach(function(inactivePlanet) {
-            inactivePlanet.removeConnectionIsActive();
+        var activePlanets = planets.filter(function(o1) {
+            return connectedlanetsFromAPI.some(function(o2) {
+                return o1.id === o2.id;
+            });
         });
 
+        inactivePlanets.forEach(function(planet) {
+            planet.removeConnectionIsActive();
+        });
+
+        activePlanets.forEach(function(planet) {
+            planet.setConnectionIsActive();
+        });
 
     }).catch(function(error) {
         console.log('Request failed', error);
