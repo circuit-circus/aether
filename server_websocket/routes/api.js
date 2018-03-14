@@ -32,6 +32,22 @@ router.post('/activateTransmission', function(req, res) {
 
   // Get an answer
   textGenService.getAnswer(question, planetName).then(function(fulfilled) {
+    let date = new Date();
+
+    let analyticsData = {
+      "timestamp" : date.toISOString().replace(/T/, ' ').replace(/\..+/, ''), // Source: https://stackoverflow.com/questions/10645994/node-js-how-to-format-a-date-string-in-utc
+      "questionTxt" : question,
+      "planetName" : planetName,
+      "questionAnswer" : fulfilled
+    }
+
+    analytics.saveData(analyticsData).then(function(analyticsMsg) {
+      console.log(analyticsMsg);
+    })
+    .catch(function(error) {
+      console.log('There was an error in updating analytics. ' + error);
+    });
+
     python.printReceipt(question, planetName, fulfilled, errorMargin).then(function(printMessage) {
       console.log(printMessage);
       let response = {
@@ -58,11 +74,6 @@ router.post('/activateTransmission', function(req, res) {
     res.send(response);
   });
 
-  let analyticsData = {
-    
-  }
-
-  analytics.saveData()
 
 });
 

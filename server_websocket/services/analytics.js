@@ -1,22 +1,29 @@
 'use strict';
 
 const fs = require('fs');
+const dataLoc = __dirname + '/../analytics/data.json';
 
 function saveData(json) {
   return new Promise(function(resolve, reject) {
-    fs.readFile('../analytics/data.json', 'utf8', (err, data) => {
+    fs.readFile(dataLoc, 'utf8', (err, data) => {
       if (err) {
         reject(err);
       }
       else {
-        console.log(JSON.parse(data)[0]);
-        resolve(JSON.parse(data));
+        data = JSON.parse(data);
+        data.push(json);
+        fs.writeFile(dataLoc, JSON.stringify(data), (err) => {
+          if (err) {
+            reject(err);
+          }
+          else {
+            resolve("Data written successfully");
+          }
+        });
       }
     });
   });
 }
-
-saveData([]);
 
 module.exports = {
   saveData
