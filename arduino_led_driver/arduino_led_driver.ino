@@ -8,7 +8,7 @@ unsigned long activeDurationTimer = 0;
 const long activeDurationLength = 60000; // Should always be longer than processingDurationLength
 const long processingDurationLength = 15000; // Should always be shorter than activeDurationLength
 
-const int thisArduinoID = 6;
+const int thisArduinoID = 4;
 const String thisArduinoIDStr = String(thisArduinoID);
 
 // ID, HUE, no of LEDs ring 1, no of LEDs ring 2, no of LEDs ring 3
@@ -41,7 +41,6 @@ CRGB stripThree[NUM_LEDS_THREE];
 #define NUM_LEDS_CORE 35
 CRGB stripCore[NUM_LEDS_CORE];
 
-
 CHSVPalette16 currentPalette;
 TBlendType    currentBlending;
 
@@ -53,7 +52,6 @@ void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN_TWO>(stripTwo, NUM_LEDS_TWO);
   FastLED.addLeds<NEOPIXEL, DATA_PIN_THREE>(stripThree, NUM_LEDS_THREE);
   FastLED.addLeds<NEOPIXEL, DATA_PIN_CORE>(stripCore, NUM_LEDS_CORE);
-
 
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onReceive(receiveEvent); // register event
@@ -67,18 +65,18 @@ void loop() {
 
   unsigned long currentMillis = millis();
 
-  if (ledState == 2 && currentMillis - activeDurationTimer >= activeDurationLength) {
+  if ((ledState == 2 || ledState == 3) && currentMillis - activeDurationTimer >= activeDurationLength) {
     ledState = 1;
   }
 
-  // ledState = 2;
+  //ledState = 3;
 
   if (ledState == 0) {
     Serial.println("State 0");
     noConnection();
   } else if (ledState == 1) {
     Serial.println("State 1");
-    idle();
+    idle(255, true);
   } else if (ledState == 2) {
     Serial.println("State 2");
     if(currentMillis - activeDurationTimer < processingDurationLength) { // Start with the processing animation
@@ -86,6 +84,9 @@ void loop() {
     } else if(currentMillis - activeDurationTimer < activeDurationLength) { // then move on to the active one
       active();
     }
+  } else if (ledState == 3) {
+    Serial.println("State 3");
+    idle(100, false);
   }
 }
 
@@ -99,7 +100,7 @@ void noConnection() {
 
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1;
-  FillLEDsFromPaletteColors(startIndex, 3); // Write 0 instead of startIndex and the leds are not animated  
+  FillLEDsFromPaletteColors(startIndex, 3, 255); // Write 0 instead of startIndex and the leds are not animated  
 
   FastLED.show();
   FastLED.delay(1000 / 100);
@@ -107,18 +108,18 @@ void noConnection() {
 }
 
 const long snakeDuration = 5000;
-void idle() {
+void idle(uint8_t newBrightness, bool showSnake) {
   currentBlending = LINEARBLEND;
 
   setPaletteHueSpectrum(planets[thisArduinoID][1], 30); 
 
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1;
-  FillLEDsFromPaletteColors(startIndex, 3);
+  FillLEDsFromPaletteColors(startIndex, 3, newBrightness);
 
   // Make snakes every 5 seconds
-  if(millis() % snakeDuration * 2 < snakeDuration) {
-    runSnakeAnimation(true);
+  if(millis() % snakeDuration * 2 < snakeDuration && showSnake) {
+    runSnakeAnimation(true, false);
   }
 
   FastLED.show();
@@ -126,15 +127,7 @@ void idle() {
 }
 
 void processing() {
-  currentBlending = NOBLEND;
-  setPaletteStriped(
-    CHSV(planets[thisArduinoID][1], 255, 255),
-    CHSV(planets[thisArduinoID][1], 10, 255)
-  );
-
-  static uint8_t startIndex = 0;
-  startIndex = startIndex + 1;
-  FillLEDsFromPaletteColors(startIndex, 16 );
+  runSnakeAnimation(false, true);
 
   FastLED.show();
   FastLED.delay(1000 / 5000);
@@ -146,16 +139,14 @@ void active() {
 
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1;
-  FillLEDsFromPaletteColors(startIndex, 16);
+  FillLEDsFromPaletteColors(startIndex, 16, 255);
 
   FastLED.show();
   FastLED.delay(1000 / 5000);
 }
 
 // pixelsPerColor16. If you set it to 16, each color in the palette will fill one pixel. Set it to 8 and it's to LEDs per color, etc.
-void FillLEDsFromPaletteColors( uint8_t colorIndex, uint8_t pixelsPerColor16) {
-  uint8_t brightness = 255;
-
+void FillLEDsFromPaletteColors( uint8_t colorIndex, uint8_t pixelsPerColor16, uint8_t brightness) {
   for ( int i = 0; i < NUM_LEDS_ONE; i++) {
     stripOne[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
     colorIndex += pixelsPerColor16;
@@ -189,6 +180,9 @@ void receiveEvent(int howMany) {
     ledState = 1;
   } else if (x == 2) { // Activated
     ledState = 2;
+    activeDurationTimer = millis();
+  } else if (x == 3) { // Someone else was activated
+    ledState = 3;
     activeDurationTimer = millis();
   }
 }
@@ -300,6 +294,7 @@ int indices[4] = {20, 45, 67, 0};
 int snakeDirections[4] = {+1, +1, +1, +1};
 long snakeTimer = 0;
 const long snakeTimerLength = 50;
+bool shouldFill[4] = {true, true, true, true};
 void determineNextIndex(CRGB leds, int num_leds, int index, bool shouldLoop) {
   // Figure out what the index should be
   if(indices[index] <= 0) {
@@ -312,6 +307,7 @@ void determineNextIndex(CRGB leds, int num_leds, int index, bool shouldLoop) {
         indices[index] = 0;
       }
     }
+    shouldFill[index] = true;
   }
   if(indices[index] >= num_leds) {
     if(snakeDirections[index] == +1) {
@@ -323,18 +319,38 @@ void determineNextIndex(CRGB leds, int num_leds, int index, bool shouldLoop) {
         indices[index] = num_leds;
       }
     }
+    shouldFill[index] = false;
   }
   indices[index] += snakeDirections[index];
 }
 
-void runSnakeAnimation(bool shouldLoop) {
+byte dimmedSat = 100;
+void runSnakeAnimation(bool shouldLoop, bool shouldFill) {
   determineNextIndex(stripOne, NUM_LEDS_ONE, 0, shouldLoop);
   determineNextIndex(stripTwo, NUM_LEDS_TWO, 1, shouldLoop);
   determineNextIndex(stripThree, NUM_LEDS_THREE, 2, shouldLoop);
   determineNextIndex(stripCore, NUM_LEDS_CORE, 3, shouldLoop);
 
-  stripOne[indices[0]] = CHSV(planets[thisArduinoID][1], 100, 255);
-  stripTwo[indices[1]] = CHSV(planets[thisArduinoID][1], 100, 255);
-  stripThree[indices[2]] = CHSV(planets[thisArduinoID][1], 100, 255);
-  stripCore[indices[3]] = CHSV(planets[thisArduinoID][1], 100, 255);
+  if(!shouldFill) {
+    stripOne[indices[0]] = CHSV(planets[thisArduinoID][1], 100, 255);
+    stripTwo[indices[1]] = CHSV(planets[thisArduinoID][1], 100, 255);
+    stripThree[indices[2]] = CHSV(planets[thisArduinoID][1], 100, 255);
+    stripCore[indices[3]] = CHSV(planets[thisArduinoID][1], 100, 255);
+  }
+  else {
+    fillSnake(stripOne, 0);
+    fillSnake(stripTwo, 1);
+    fillSnake(stripThree, 2);
+    fillSnake(stripCore, 3);
+  }
 }
+
+void fillSnake(CRGB* leds, int index) {
+  if(!shouldFill[index]) {
+    leds[indices[index]] = CHSV(planets[thisArduinoID][1], dimmedSat, 255);
+  }
+  else {
+    leds[indices[index]] = CHSV(planets[thisArduinoID][1], 255, 255);
+  }
+}
+

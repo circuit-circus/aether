@@ -8,7 +8,7 @@ char serverAddress[] = "192.168.1.128";
 int port = 8080;
 
 // ID of this device
-const int thisArduinoID = 0;
+const int thisArduinoID = 4;
 String thisArduinoIDStr = String(thisArduinoID);
 bool hasSentID = false;
 
@@ -73,6 +73,11 @@ void loop() {
       if(msg == thisArduinoIDStr) {
         Wire.beginTransmission(8);
         Wire.write(2);
+        Wire.endTransmission();
+      }
+      else {
+        Wire.beginTransmission(8);
+        Wire.write(3);
         Wire.endTransmission();
       }
     }
