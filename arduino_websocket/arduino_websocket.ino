@@ -8,13 +8,16 @@ char serverAddress[] = "192.168.1.128";
 int port = 8080;
 
 // ID of this device
-const int thisArduinoID = 4;
+const int thisArduinoID = 6;
 String thisArduinoIDStr = String(thisArduinoID);
 bool hasSentID = false;
 
 WiFiClient wifi;
 WebSocketClient client = WebSocketClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
+
+unsigned long lastSentConnectedTimer = 0;
+unsigned long lastSentDisconnectedTimer = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -38,6 +41,13 @@ void setup() {
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
+
+  Serial.println("Sending 0");
+  Wire.beginTransmission(8);
+  Wire.write(0);
+  Wire.endTransmission();
+
+  delay(5000);
 }
 
 void loop() {
@@ -55,6 +65,9 @@ void loop() {
 
       hasSentID = true;
 
+    
+      Serial.println("Sending 1");
+
       // Tell Uno that we're connected
       Wire.beginTransmission(8);
       Wire.write(1);
@@ -71,26 +84,34 @@ void loop() {
 
       // If the message is to this device, tell that to the Uno
       if(msg == thisArduinoIDStr) {
+        Serial.println("Sending 2");
         Wire.beginTransmission(8);
         Wire.write(2);
         Wire.endTransmission();
-      }
-      else {
+      } else {
+        Serial.println("Sending 3");
         Wire.beginTransmission(8);
         Wire.write(3);
         Wire.endTransmission();
       }
+
     }
 
   }
 
   // Tell Uno we're not connected
-  Wire.beginTransmission(8);
-  Wire.write(0);
-  Wire.endTransmission();
+  unsigned long currentMillisDisconnected = millis();
+  
+  if(currentMillisDisconnected - lastSentDisconnectedTimer >= 5000) {
+    Serial.println("Disconnected, sending 0");
+    Wire.beginTransmission(8);
+    Wire.write(0);
+    Wire.endTransmission();
+
+    lastSentDisconnectedTimer = millis();
+  }
 
 
-  Serial.println("Disconnected");
   hasSentID = false;
 }
 
