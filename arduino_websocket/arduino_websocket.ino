@@ -111,7 +111,14 @@ void loop() {
     lastSentDisconnectedTimer = millis();
   }
 
-
   hasSentID = false;
+
+  while ( status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to Network named: ");
+    Serial.println(ssid);
+
+    // Connect to the WPA/WPA2 network:
+    status = WiFi.begin(ssid, pass);
+  }
 }
 
