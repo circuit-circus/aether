@@ -17,6 +17,7 @@ var errorAudio = new Audio('sounds/error.mp3');
 var UPDATE_PLANETS_TIME = 15000;
 var RESET_TIME = 180000;
 var programInactive = false;
+var terminalInterval;
 
 var terminalCounter = 0;
 var translationErrorMargin;
@@ -500,6 +501,25 @@ function runState4() {
         alienNoise1.play();
     }, 24000);
 
+    var loadingBarPercent = 0;
+
+    terminalInterval = setInterval(function() {
+        $('#terminal-container').animate({
+            scrollTop: $('#terminal-container').get(0).scrollHeight
+        }, 200);
+
+        if(loadingBarPercent < 100) {
+            loadingBarPercent++;
+            $('#loading-bar-content').width(loadingBarPercent + '%');
+            $('#loading-bar-percent').text(loadingBarPercent + '%');
+
+            if(loadingBarPercent >= 10) {
+                $('#loading-bar-percent').show();
+            }
+        }
+
+    }, 32000 / 100);
+
     runTerminalGUI();
 }
 
@@ -532,6 +552,13 @@ function resetProgram() {
     $('#terminal-content').html('');
     $('.terminal-new-content #terminal-typing').html('');
     $('main').attr('data-state', 1);
+
+    clearInterval(terminalInterval);
+
+    $('#loading-bar-content').width('0%');
+    $('#loading-bar-percent').text('0%');
+    $('#loading-bar-percent').hide();
+
 }
 
 
@@ -539,12 +566,6 @@ function resetProgram() {
  * Write things in the "terminal"
  */
 function runTerminalGUI() {
-
-    setInterval(function() {
-        $('#terminal-container').animate({
-            scrollTop: $('#terminal-container').get(0).scrollHeight
-        }, 200);
-    },200);
 
     if(programState != 4) return;
 
@@ -639,9 +660,13 @@ function runTerminalGUI() {
                 runTerminalGUI();
             }
             else {
+
+                $('#loading-bar-content').width('100%');
+                $('#loading-bar-percent').text('100%');
+
                 setTimeout(function() {
                     resetProgram();
-                }, 1000);
+                }, 2000);
             }
         }
     }
