@@ -8,7 +8,7 @@ char serverAddress[] = "192.168.1.128";
 int port = 8080;
 
 // ID of this device
-const int thisArduinoID = 6;
+const int thisArduinoID = 0;
 String thisArduinoIDStr = String(thisArduinoID);
 bool hasSentID = false;
 
@@ -112,6 +112,10 @@ void loop() {
   }
 
   hasSentID = false;
+
+  delay(3000);
+
+  status = WiFi.status();
 
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to Network named: ");
