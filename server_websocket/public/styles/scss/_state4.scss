@@ -3,9 +3,47 @@
     top: 350px;
 }
 
+#loading-bar-container {
+    width: 700px;
+    height: 35px;
+    margin: 0 auto 20px;
+    padding: 6px;
+    border: 2px solid #fff;
+    overflow: hidden;
+
+    #loading-bar-title {
+        width: 19%;
+        float: left;
+        font-size: 12px;
+        padding: 2px 5px 0;
+    }
+
+    #loading-bar {
+        width: 81%;
+        height: 100%;
+        float: left;
+    }
+
+    #loading-bar-content {
+        width: 0%;
+        height: 100%;
+        background-color: #fff;
+
+        #loading-bar-percent {
+            color: #000;
+            float: right;
+            padding: 0 10px;
+            font-size: 14px;
+            padding-top: 1px;
+
+            display: none;
+        }
+    }
+}
+
 #terminal-container {
     width: 700px;
-    height: 375px;
+    height: 320px;
     border: 2px solid #fff;
     padding: 10px;
     margin: 0 auto;
